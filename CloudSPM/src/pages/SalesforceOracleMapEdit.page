@@ -1,0 +1,41 @@
+<!--*******************************************************************
+* File Name : SalesforceOracleMapEdit
+* Description : Page for edit Salesforce Oracle Map screen
+* Copyright : CloudSPM
+******************************************************************** --> 
+
+<apex:page tabStyle="Salesforce_Oracle_Maps__c" standardController="Salesforce_Oracle_Maps__c" extensions="SalesforceOracleMapEditController"> 
+    <style>
+    	.objectError { color: #D74C3B; font-weight: strong;}
+    </style>
+    <apex:sectionHeader title="Salesforce - Oracle Map" subtitle="{!Salesforce_Oracle_Maps__c.Name}" />
+    <br/>
+    <apex:form id="fieldMappingForm">
+        <apex:pageBlock mode="edit" title="Salesforce - Oracle Map Edit" tabStyle="Salesforce_Oracle_Maps__c"> 
+        	<apex:pageBlockButtons >
+        		<apex:commandButton action="{!save}" value="Save"/>
+        		<apex:commandButton action="{!cancel}" value="Cancel"/>
+        	</apex:pageBlockButtons>
+        	<apex:pageBlockSection title="Information">
+        		<apex:inputField value="{!Salesforce_Oracle_Maps__c.Name}" required="true"/>
+        		<apex:inputField value="{!Salesforce_Oracle_Maps__c.Status__c}" />
+        		<apex:pageBlockSectionItem >
+	        		<apex:outputLabel value="Salesforce Object" for="sfObject"/>
+	        		<apex:outputPanel layout="block" styleClass="requiredInput">
+		       			<apex:outputPanel layout="block" styleClass="requiredBlock"/>
+		        		<apex:selectList id="sfObject" value="{!Salesforce_Oracle_Maps__c.Salesforce_Object_Api_Name__c}" size="1" required="true" disabled="{!IF(Salesforce_Oracle_Maps__c.CreatedDate==null, false, true)}">
+		        			<apex:selectOptions value="{!objectList}"/>
+		        		</apex:selectList>
+		        		<br/>
+		        		<apex:message for="sfObject"  styleClass="objectError"/>
+	        		</apex:outputPanel>
+        		</apex:pageBlockSectionItem>
+        		<apex:inputField value="{!Salesforce_Oracle_Maps__c.Oracle_Response_Location__c}" />	
+       			<apex:inputField value="{!Salesforce_Oracle_Maps__c.Business_Unit_Name__c}" />	
+       			<apex:inputField value="{!Salesforce_Oracle_Maps__c.Lookup_Name__c}" />
+       			<apex:inputField value="{!Salesforce_Oracle_Maps__c.Lookup_Column__c}" />
+        	</apex:pageBlockSection>
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>

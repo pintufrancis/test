@@ -1,0 +1,32 @@
+<apex:page controller="DashboardParameterMassEditController" tabStyle="Dashboard_Parameter__c">
+<apex:form id="form">
+<apex:actionFunction action="{!composeLookupColumns}" name="reRenderTable" reRender="form"/>
+<apex:sectionHeader title="Parameters" subtitle="Edit Parameter"/>
+<apex:pageMessages ></apex:pageMessages>
+<apex:pageBlock title="Parameters">
+<apex:pageBlockButtons > 
+  <apex:commandButton value="Save" action="{!save}"/>
+</apex:pageBlockButtons>
+  <apex:pageBlockTable value="{!ParameterList}" var="p">
+    <apex:column headerValue="Parameter Name"><apex:inputField value="{!p.Name}"/></apex:column>
+    <apex:column headerValue="Display"><apex:inputField value="{!p.Display__c}"/></apex:column>
+    <apex:column headerValue="Sequence Number"><apex:inputField value="{!p.Display_Sequence__c}" style="width:40px;"/></apex:column>
+    <apex:column headerValue="Default Value"><apex:inputField value="{!p.Default_Value__c}"/></apex:column>
+    <apex:column headerValue="Lookup Name"><apex:inputField value="{!p.Lookup_Name__c}" onchange="reRenderTable()"/></apex:column>    
+    <apex:column headerValue="Lookup Column" >      
+        <apex:selectList value="{!p.Lookup_Column__c}" rendered="{!IF(p.Lookup_Name__c == null, true, false)}" style="width:200px">  
+            <apex:selectOption itemValue="" itemLAbel=""/>                
+        </apex:selectList>                   
+        <apex:selectList value="{!p.Lookup_Column__c}" size="1" rendered="{!IF(p.Lookup_Name__c == null, false, true)}" style="width:200px">
+            <apex:selectOptions value="{!lookupColumns[p.Lookup_Name__c]}"/>                
+        </apex:selectList>
+    </apex:column>
+    <apex:column headerValue="Label"><apex:inputField value="{!p.Label__c}"/></apex:column>    
+    <apex:column headerValue="Dashboard Layout"><apex:inputField value="{!p.Dashboard_Layout__c}"/></apex:column>
+    <apex:column headerValue="Required"><apex:inputField value="{!p.Required__c}"/></apex:column>
+    <apex:column headerValue="Multi Select"><apex:inputField value="{!p.Multi_Select__c}"/></apex:column>
+    <apex:column headerValue="Lookup Name"><apex:inputField value="{!p.Lookup_Name_Formula__c}"/></apex:column>
+  </apex:pageBlockTable>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

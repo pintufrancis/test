@@ -1,0 +1,37 @@
+<apex:page showChat="false" showHeader="false" sidebar="false" controller="FCSetupController">
+  <head>
+  <style>
+      body{
+          //background-color: #E8E8E8;
+          background: none;
+      }
+  </style>
+  <script>
+      function showScreen(url){
+          top.location.href = url;    
+      }
+  </script>
+  <script src="https://code.jquery.com/jquery-1.9.1.js"/>
+  <apex:outputPanel rendered="{!!isAdminUser}">
+      <script>
+          //parent.postMessage("child frame", "*");
+          $(document).ready(function(){        
+               
+              $("#sidebarDiv #ToHideMyComp", window.top.document).parent().parent().hide();
+             
+            });
+      </script>
+  </apex:outputPanel>
+  
+  </head>
+  <apex:outputPanel rendered="{!isAdminUser}">
+      <ul style="margin:0px;padding:0px;">
+          <br/>
+          <apex:repeat value="{!fcModelList}" var="fcm">
+              <li>
+                  <a href="javascript:window.top.location.href='/{!fcm.prefix}'" >{!fcm.label}</a>
+              </li>
+          </apex:repeat>         
+    </ul>
+ </apex:outputPanel>
+</apex:page>

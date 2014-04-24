@@ -1,0 +1,186 @@
+<!--*******************************************************************
+* File Name : FieldMappingHome
+* Description : Page for displaying components in tab.
+* Copyright : CloudSPM
+******************************************************************** -->
+
+<apex:page tabStyle="Salesforce_Oracle_Maps__c" standardController="Salesforce_Oracle_Maps__c" extensions="FieldMappingHomeController"> 
+    <style type="text/css">
+        .fieldMapping {
+            font-family: Arial,Helvetica,sans-serif;
+            font-size: 12px;
+        }
+        .fieldMapping .detailList select {
+            font-family: Arial,Helvetica,sans-serif;
+            font-size: 13px;
+        }
+        .fieldMapping .requiredBlock {
+            display:none !important; 
+        }
+        .fieldMapping .errorMsg {
+            display:none !important;
+        }
+        .fieldMapping .error {
+            //display:none !important;
+        }
+    </style>
+    <apex:sectionHeader title="Salesforce - Oracle Map" subtitle="{!Salesforce_Oracle_Maps__c.Name}" />
+    <br/>
+    <apex:form id="fieldMappingForm" styleClass="fieldMapping">
+    	<apex:actionFunction action="{!composeLookupColumns}" name="reRenderTable" reRender="fieldMappingForm"/>
+        <apex:detail subject="{!Salesforce_Oracle_Maps__c.Id}" relatedList="false" title="false"/> 
+        <apex:pageBlock id="mappingBlock" title="Field Mapping"> 
+            <apex:pageBlockButtons > 
+               <apex:commandButton action="{!editMapping}" value="Edit" reRender="mappingBlock" rendered="{!!isEditMapping}"/>
+               <apex:commandButton action="{!saveMapping}" value="Save" reRender="mappingBlock" rendered="{!isEditMapping}"/>
+               <apex:commandButton action="{!cancelMapping}" value="Cancel" reRender="mappingBlock" immediate="true" rendered="{!isEditMapping}"/>               
+               <apex:commandButton action="{!createschedular}" value="Schedule Job" reRender="mappingBlock" immediate="true" /> 
+            </apex:pageBlockButtons> 
+            
+            <apex:pageBlockSection showHeader="false" collapsible="false" columns="1">
+                <apex:outputPanel rendered="{!!isEditMapping}">
+                    <apex:pageMessages id="mappingSuccessMessages"/> <br/>
+                    <apex:pageBlockSectionItem > 
+                        <apex:outputPanel style="max-height:347px; overflow:auto; width:100%;" layout="block">
+                            <apex:pageBlockTable value="{!sfOracleMapping}" var="mappingRow" align="center">
+                                <apex:column headerValue="Oracle Field" value="{!mappingRow}" />                               
+                                <apex:column headerValue="Salesforce Object" value="{!sfOracleMapping[mappingRow].Salesforce_Object_Api_Name__c}" />
+                                <apex:column headerValue="Salesforce Field" value="{!sfOracleMapping[mappingRow].Salesforce_Field_Api_Name__c}" />
+                                <apex:column headerValue="Lookup Name" value="{!sfOracleMapping[mappingRow].Lookup_Name__c}" />
+                                <apex:column headerValue="Lookup Input Column" value="{!sfOracleMapping[mappingRow].Lookup_Input_Column__c}" />
+                                <apex:column headerValue="Lookup Output Column" value="{!sfOracleMapping[mappingRow].Lookup_Output_Column__c}" />
+                                <apex:column headerValue="API Name" value="{!sfOracleMapping[mappingRow].Oracle_Report_API__c}" />
+                            </apex:pageBlockTable>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:outputPanel>
+                
+                <apex:outputPanel rendered="{!isEditMapping}">
+                    <apex:pageMessages id="mappingErrorMessages"/> <br/>
+                    <apex:pageBlockSectionItem > 
+                        <apex:outputPanel id="fieldMappingTable" style="max-height:355px; overflow:auto; width:100%;" layout="block">
+                            <apex:pageBlockTable value="{!sfOracleMapping}" var="mappingRow" align="center" width="100%">
+                                <apex:column headerValue="Oracle Field" value="{!mappingRow}" />
+                                <apex:column headerValue="Salesforce Object" >
+                                    <apex:outputPanel id="objects">
+                                        <apex:actionRegion >
+                                            <apex:SelectList value="{!sfOracleMapping[mappingRow].Salesforce_Object_Api_Name__c}" rendered="{!IF(manualStatus[mappingRow] = true, false, true)}" size="1" style="width:150px">
+                                                <apex:selectOptions value="{!SalesforceObjects}" />
+                                                <apex:actionSupport event="onchange" reRender="objects, fields" />
+                                            </apex:SelectList> 
+                                         </apex:actionRegion>
+                                     </apex:outputPanel>
+                                 </apex:column>
+                                 <apex:column headerValue="Salesforce Field" >
+                                    <apex:outputPanel id="fields">
+                                        <apex:actionRegion >
+                                            <apex:SelectList value="{!sfOracleMapping[mappingRow].Salesforce_Field_Api_Name__c}" rendered="{!IF(manualStatus[mappingRow] = true, false, true)}" size="1" required="true" style="width:150px">
+                                                <apex:selectOptions value="{!feildListMap[sfOracleMapping[mappingRow].Salesforce_Object_Api_Name__c]}" />
+                                                <apex:actionSupport event="onchange" reRender="fieldMappingTable" />
+                                            </apex:SelectList>
+                                        </apex:actionRegion>
+                                    </apex:outputPanel>
+                                    <apex:inputField value="{!sfOracleMapping[mappingRow].Salesforce_Field_Api_Name__c}" rendered="{!IF(manualStatus[mappingRow] = true, true, false)}" required="true" style="width:144px"/>
+                                 </apex:column>
+                                 <apex:column headerValue="Lookup Name" >
+                                    <apex:inputField value="{!sfOracleMapping[mappingRow].Lookup_Name__c}" onchange="reRenderTable()"/>
+                                 </apex:column>
+                                 <apex:column headerValue="Lookup Input Column" >
+                                 	<apex:selectList value="{!sfOracleMapping[mappingRow].Lookup_Input_Column__c}" rendered="{!IF(sfOracleMapping[mappingRow].Lookup_Name__c == null, true, false)}" style="width:150px">  
+							            <apex:selectOption itemValue="" itemLAbel=""/>                
+							        </apex:selectList>                   
+							        <apex:selectList value="{!sfOracleMapping[mappingRow].Lookup_Input_Column__c}" size="1" rendered="{!IF(sfOracleMapping[mappingRow].Lookup_Name__c == null, false, true)}" style="width:150px">
+							            <apex:selectOptions value="{!lookupColumns[sfOracleMapping[mappingRow].Lookup_Name__c]}"/>                
+							        </apex:selectList>
+                                 </apex:column>
+                                 <apex:column headerValue="Lookup Output Column" >
+                                 	<apex:selectList value="{!sfOracleMapping[mappingRow].Lookup_Output_Column__c}" rendered="{!IF(sfOracleMapping[mappingRow].Lookup_Name__c == null, true, false)}" style="width:150px">  
+							            <apex:selectOption itemValue="" itemLAbel=""/>                
+							        </apex:selectList>                   
+							        <apex:selectList value="{!sfOracleMapping[mappingRow].Lookup_Output_Column__c}" size="1" rendered="{!IF(sfOracleMapping[mappingRow].Lookup_Name__c == null, false, true)}" style="width:150px">
+							            <apex:selectOptions value="{!lookupColumns[sfOracleMapping[mappingRow].Lookup_Name__c]}"/>                
+							        </apex:selectList>
+                                 </apex:column>
+                                 <apex:column headerValue="API Name" >
+                                    <apex:inputField value="{!sfOracleMapping[mappingRow].Oracle_Report_API__c}" />
+                                 </apex:column>
+                            </apex:pageBlockTable>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:outputPanel>
+            </apex:pageBlockSection>  
+        </apex:pageBlock>
+        <apex:pageBlock id="filterBlock" title="Filters" > 
+            <apex:pageBlockButtons >
+               <apex:commandButton action="{!editFilters}" value="Edit" reRender="filterBlock" rendered="{!!isEditFilters}"/>
+               <apex:commandButton action="{!saveFilters}" value="Save" reRender="filterBlock" rendered="{!isEditFilters}"/>
+               <apex:commandButton action="{!cancelFilters}" value="Cancel" reRender="filterBlock" immediate="true" rendered="{!isEditFilters}"/>
+            </apex:pageBlockButtons> 
+            
+            <apex:pageBlockSection showHeader="false" collapsible="false" columns="1">
+                <apex:outputPanel rendered="{!!isEditFilters}">
+                    <apex:pageMessages id="filterSuccessMessages" /> <br/>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputPanel >
+                            <apex:variable var="count" value="{!0}" />
+                            <apex:pageBlockTable value="{!fitlerCriteria}" var="filterRow" align="center" >
+                                <apex:column headerValue="Filter" >
+                                    <apex:variable var="count" value="{!count + 1}"/> {!count}
+                                </apex:column>
+                                <apex:column headerValue="Object" value="{!filterRow.Salesforce_Object__c}" />
+                                <apex:column headerValue="Field" value="{!filterRow.Salesforce_Field__c}" />
+                                <apex:column headerValue="Operator" value="{!filterRow.Operator__c}" />
+                                <apex:column headerValue="Value" value="{!filterRow.Value__c}" />
+                            </apex:pageBlockTable>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:outputPanel>
+                
+                <apex:outputPanel id="filterPanel" rendered="{!isEditFilters}">
+                    <apex:pageMessages id="filterErrorMessages" /> <br/>
+                    <apex:commandButton action="{!addFilter}" value="Add Filter" reRender="filterTable" style="width:150px" />
+                    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputPanel id="filterTable">
+                            <apex:variable var="count" value="{!0}" />
+                            <apex:pageBlockTable value="{!fitlerCriteria}" var="filterRow" align="center" >
+                                <apex:column headerValue="Filter" >
+                                    <apex:variable var="count" value="{!count + 1}"/> {!count}
+                                </apex:column>
+                                <apex:column headerValue="Object">
+                                    <apex:outputPanel id="filterObjects">
+                                        <apex:SelectList value="{!filterRow.Salesforce_Object__c}" size="1" style="width:200px">
+                                            <apex:selectOptions value="{!SalesforceObjects}" />
+                                            <apex:actionSupport event="onchange" reRender="filterFields" />
+                                        </apex:SelectList>
+                                    </apex:outputPanel>
+                                </apex:column>
+                                <apex:column headerValue="Field">
+                                    <apex:outputPanel id="filterFields">
+                                        <apex:actionRegion >
+                                            <apex:SelectList value="{!filterRow.Salesforce_Field__c}" size="1" style="width:200px" >
+                                                <apex:selectOptions value="{!feildListMap[filterRow.Salesforce_Object__c]}" />
+                                            </apex:SelectList>
+                                        </apex:actionRegion>
+                                    </apex:outputPanel>
+                                </apex:column>
+                                <apex:column headerValue="Operator" >
+                                    <apex:inputField value="{!filterRow.Operator__c}" />
+                                </apex:column>
+                                <apex:column headerValue="Value" >
+                                    <apex:inputText value="{!filterRow.Value__c}" />
+                                </apex:column>
+                                <apex:column headerValue="Remove" >
+                                    <apex:commandLink action="{!removeFilter}" value="Remove" reRender="filterTable">
+                                        <apex:param value="{!count-1}" name="paramValue" assignTo="{!removeIndex}"/>
+                                    </apex:commandLink>
+                                </apex:column>
+                            </apex:pageBlockTable>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:outputPanel>
+            </apex:pageBlockSection>  
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>

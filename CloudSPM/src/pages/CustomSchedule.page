@@ -1,0 +1,266 @@
+<apex:page controller="CustomScheduleController" id="pg">
+    <apex:includeScript value="{!URLFOR($Resource.treeView,'treeView/jquery.js')}"/>
+    <script>
+    MyQuery();
+    function MyQuery(){
+        $(document).ready(function(){
+            $(".mnth1, .mnth2").click(function(){
+                if($(this).val() == 'day') {
+                    $(".daySelCls").attr('disabled', false);
+                    $(".mnthSelCls,.wekSelCls").attr('disabled', true);
+                }
+                if($(this).val() == 'month'){
+                    $(".daySelCls").attr('disabled', true);
+                    $(".mnthSelCls,.wekSelCls").attr('disabled', false);
+                }
+                
+            });
+        
+            $(".myWeek").click(function(){
+                
+                $("#wmDiv_1").hide();
+                $("#wmDiv_2").show();
+                $("#wmDiv_3").hide();
+                $("#pst").show();
+                $("#pst0").closest( "tr" ).show();
+            })
+            $(".myMonth").click(function(){
+                $("#wmDiv_1").show();
+                $("#wmDiv_2").hide();
+                $("#wmDiv_3").hide();
+                $("#pst").show();
+                $("#pst0").closest( "tr" ).show();
+            })
+            $(".myHour").click(function(){
+                
+                $("#wmDiv_1").hide();
+                $("#wmDiv_2").hide();
+                $("#pst").hide();
+                $("#wmDiv_3").show();
+                $("#pst0").closest( "tr" ).hide();
+            })
+            
+       
+            if('{!scheduleOpt}' != ''){
+                showValues('{!scheduleOpt}');                    
+            }else{
+                $(".myWeek").attr('checked',true);
+                $(".mnth1").attr('checked',true);
+                $("#wmDiv_1").hide();
+                $("#wmDiv_2").show();
+                $("#wmDiv_3").hide();
+                $(".daySelCls").attr('disabled', false);
+                $(".mnthSelCls,.wekSelCls").attr('disabled', true);                
+            } 
+        })           
+            
+     }
+     function showValues(schType){
+         
+         if(schType == 'weekly'){
+             $(".myWeek").click();
+         }else if(schType == 'monthly'){
+             if('{!selectedDayOpt}' == 'month'){
+                 $(".mnth2").click();
+             }else{
+                 $(".mnth1").click();
+             }
+             $(".myMonth").click();
+         }else if(schType == 'hourly'){
+             $(".myHour").click();
+         }
+         
+     }
+    </script>
+    <style>
+        .wmDiv{
+            background-color:white;
+            border: 1px solid #CCCCCC;
+            padding:5px
+        }
+    </style>
+ <apex:form id="frm">
+  <apex:pageBlock id="pb_1">
+  <!------------Action Function------------>
+
+  <!------------Page Block Button------------>
+      <apex:pageBlockButtons >
+          <apex:commandButton action="{!sheduleExicute}" value="Save" />
+          <apex:commandButton value="Cancel"/>
+      </apex:pageBlockButtons>
+  <!------------Page Block Section------------>   
+      <apex:pageBlockSection title="Scheduler Screen" columns="1" id="pbs_1">
+          <apex:pageMessages escape="false"></apex:pageMessages>
+          <apex:pageBlockSectionItem >
+              <apex:outputLabel escape="false" ><strong>*Job Type</strong></apex:outputLabel>
+              <apex:outputPanel >
+              <div class="requiredInput">
+                  <div class="requiredBlock"></div>
+                  <apex:selectList value="{!jobType}" size="1">
+                  	  <apex:selectOption itemValue="oracle_synchronization" itemLabel="Oracle Synchronization"/>
+                  	  <apex:selectOption itemValue="lookup_refresh" itemLabel="Lookup Refresh"/>
+                  </apex:selectList>
+              </div>
+              </apex:outputPanel>
+          </apex:pageBlockSectionItem>
+          <apex:pageBlockSectionItem >
+              <apex:outputLabel escape="false" ><strong>*Job Name</strong></apex:outputLabel>
+              <apex:outputPanel >
+              <div class="requiredInput">
+                  <div class="requiredBlock"></div>
+                  <apex:inputText value="{!jobName}"  />  
+              </div>
+              </apex:outputPanel>
+          </apex:pageBlockSectionItem>
+          
+          <div>
+              <table>
+                  <tr>
+                      <td>
+                          <b>Schedule Apex Execution</b>
+                      </td>
+                      <td>
+                          
+                          <input type="radio" value="weekly" name="a" class="myWeek" />Weekly
+                          <input type="radio" value="monthly"  name="a" class="myMonth"/>Monthly
+                          <input type="radio" value="hourly" name="a" class="myHour"/>Hourly                          
+                          <!--
+                          <apex:selectRadio onClick="showValues(this); return false;" value="{!scheduleOpt}">
+                              <apex:selectOptions value="{!wmOpt}" ></apex:selectOptions>
+                          </apex:selectRadio>
+                          -->
+                      </td>
+                  </tr>
+              </table>
+          </div>
+          <!---------Hourly------>
+          <apex:outputPanel >
+          <div class="wmDiv" id="wmDiv_3">
+            Hours:<apex:selectList value="{!selectedHoursOpt}" style="margin:5px;" size="1">
+                   <apex:selectOptions value="{!hoursOpt}"/>
+            </apex:selectList>
+           </div>
+         </apex:outputPanel>
+         <!------Monthly--------->
+         <apex:outputPanel >
+         <div class="wmDiv" id="wmDiv_1">
+         <table>
+         <tr> 
+              <td><input class="mnth1" value="day" type="radio" name="monthRedio"/>
+                On day  
+                <apex:selectList value="{!selectedDaysopt}" styleClass="daySelCls" style="margin:5px;" size="1">
+                   <apex:selectOptions value="{!daysOpt}"/>
+                </apex:selectList>of every month
+               </td>
+         </tr>
+         <tr>
+             <td>
+                <input class="mnth2" value="month" type="radio" name="monthRedio"/> 
+                On
+                <apex:selectList value="{!selectedWeekNoOpt}" styleClass="mnthSelCls" style="margin:5px;" size="1">
+                   <apex:selectOptions value="{!weekNoOpt}"/>
+                </apex:selectList> 
+                
+                <apex:selectList value="{!selectedWeekNameOpt}" styleClass="wekSelCls" style="margin:5px;" size="1">
+                   <apex:selectOptions value="{!weekNameOpt}"/>
+                </apex:selectList>
+                Of every month
+             </td>
+         </tr>
+         </table>
+         </div>
+         </apex:outputPanel>
+        <!------Weekly--------->
+        <apex:outputPanel >                
+        <div class="wmDiv" id="wmDiv_2">
+        Recurs every week on
+        <table>
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!sunBool}"/>Sunday
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!monBool}"/>Monday
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!tusBool}"/>Tuesday
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!wedBool}"/>Wednesday
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!thsBool}"/>Thursday
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!friBool}"/>Friday
+                </td>
+            </tr>
+            
+            <tr>
+                <td>
+                <apex:inputCheckbox value="{!satBool}"/>Saturday
+                </td>
+            </tr>
+        </table>
+       </div> 
+       </apex:outputPanel>
+       
+       <apex:inputField value="{!schedulerManager.End_Date__c}" />
+       
+       <apex:pageBlockSectionItem >
+           <apex:outputLabel escape="false" ><strong>Preferred Start Time</strong></apex:outputLabel>
+           <apex:outputPanel >
+               <div id="pst0">
+               <div class="requiredInput">
+                    <div class="requiredBlock"></div>
+                    <select id="pst0" name="pst0">
+                        <option value="0">12:00 AM</option>
+                        <option value="1">1:00 AM</option>
+                        <option value="2">2:00 AM</option>
+                        <option value="3">3:00 AM</option>
+                        <option value="4">4:00 AM</option>
+                        <option value="5">5:00 AM</option>
+                        <option value="6">6:00 AM</option>
+                        <option value="7">7:00 AM</option>
+                        <option value="8">8:00 AM</option>
+                        <option value="9">9:00 AM</option>
+                        <option value="10">10:00 AM</option>
+                        <option value="11">11:00 AM</option>
+                        <option value="12">12:00 PM</option>
+                        <option value="13">1:00 PM</option>
+                        <option value="14">2:00 PM</option>
+                        <option value="15">3:00 PM</option>
+                        <option value="16">4:00 PM</option>
+                        <option value="17">5:00 PM</option>
+                        <option value="18">6:00 PM</option>
+                        <option value="19">7:00 PM</option>
+                        <option value="20">8:00 PM</option>
+                        <option value="21">9:00 PM</option>
+                        <option value="22">10:00 PM</option>
+                        <option value="23">11:00 PM</option>
+                    </select>
+                </div>
+                </div>
+            </apex:outputPanel>
+      </apex:pageBlockSectionItem>      
+      
+    </apex:pageBlockSection>
+  
+  </apex:pageBlock>
+ </apex:form>
+</apex:page>

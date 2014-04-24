@@ -1,0 +1,101 @@
+<!--*******************************************************************
+* File Name : OracleIncentiveEstimator
+* Description : Page for searching records in SF and manual push to oracle for incentive estimation.
+* Copyright : CloudSPM
+******************************************************************** -->
+<apex:page controller="OracleIncentiveEstimatorController" docType="html-5.0">
+ 
+<style>
+.hideHeader { 
+    display: none;
+}
+</style>
+    <apex:sectionHeader title="Oracle Incentive Estimator" subtitle="Incentive Estimator"/>
+    <apex:form >
+        <apex:pageBlock title="Estimator Search"> 
+            <apex:pageMessages id="mappingMessages"/> <br/>
+            <apex:pageBlockSection columns="1">
+                <apex:panelGrid columns="8" id="theGrid">
+                    <apex:inputText id="searchText" value="{!searchText}" style="width: 300px; height: 20px;" />
+                    <apex:outputText style="width: 100px;"/>
+                    <apex:outputLabel value="Close Date" style="font-weight:bold;"/>
+                    <apex:outputLabel for="dateFrom" value="From"/>
+                    <apex:input id="dateFrom" value="{!closeDateFrom}" onfocus="DatePicker.pickDate(false, this , false);" html-showCalendar="false" style="height: 20px;" />
+                    <apex:outputLabel for="dateTo" value="To"/>
+                    <apex:input id="dateTo" value="{!closeDateTo}" onfocus="DatePicker.pickDate(false, this , false);" style="height: 20px;" />
+                    <apex:commandButton action="{!searchRecords}" value="Search" reRender="searchResults, mappingMessages"/> 
+                </apex:panelGrid>
+                    
+
+                    
+            </apex:pageBlockSection> 
+            <apex:outputPanel id="searchResults">
+                <apex:pageBlockSection columns="1">
+                    <apex:pageBlockSectionItem >
+                            <apex:pageBlockTable value="{!searchResults}" var="result" rendered="{!searchResults.size>0}" >
+                                <apex:column headerValue="Select">
+                                    <apex:inputCheckbox styleClass="checkBox" value="{!result['isSelected']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Name">
+                                    <apex:outputLink value="/{!result['record.Id']}">{!result['record.Name']}</apex:outputLink>
+                                </apex:column>
+                                <apex:column headerValue="Account Name">
+                                    <apex:outputText value="{!result['record.Account.Name']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Opportunity Amount">
+                                    <apex:outputField value="{!result['record.Amount']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Close Date">
+                                    <apex:outputField value="{!result['record.CloseDate']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Stage">
+                                    <apex:outputField value="{!result['record.StageName']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Estimated Incentive">
+                                    <apex:outputField value="{!result['record.Estimated_Incentive__c']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Estimate Status" >
+                                    <apex:outputField value="{!result['record.Estimate_Status__c']}"/> 
+                                </apex:column>
+                                <apex:column headerValue="Status Date">
+                                    <apex:outputField value="{!result['record.Status_Date__c']}"/> 
+                                </apex:column>
+                            </apex:pageBlockTable>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection >
+                    <center>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel rendered="{!searchResults.size>0}">
+                                <button type="button" onClick="check();" class="btn"> Select All </button> 
+                                <button type="button" onClick="unCheck();" class="btn"> Clear </button> 
+                                <apex:commandButton action="{!oracleEstimator}" value="Estimate Commission" reRender="searchResults, mappingMessages"/>  
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                    </center>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    
+    <script>
+    function check() {
+        var allInputs = document.getElementsByTagName("input");
+        for (var i = 0, max = allInputs.length; i < max; i++) {
+            if (allInputs[i].type === 'checkbox' && allInputs[i].className === 'checkBox') {
+                allInputs[i].checked = true;
+            }
+        }
+    }
+    
+    function unCheck() {
+        var allInputs = document.getElementsByTagName("input");
+        for (var i = 0, max = allInputs.length; i < max; i++) {
+            if (allInputs[i].type === 'checkbox' && allInputs[i].className === 'checkBox') {
+                allInputs[i].checked = false;
+            }
+        }
+    }
+    </script>
+
+</apex:page>

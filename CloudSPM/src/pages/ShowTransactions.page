@@ -1,0 +1,930 @@
+<!--
+    Name : ShowTransactions
+    Author : CloudSPM
+    Date : November 28, 2013
+    Description : This Page is showing transaction records from oracle fusion service.
+-->
+<apex:page id="pg" controller="TransactionController" tabStyle="Transaction_Report__tab" sidebar="false" >
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>29.0</apiVersion>
+    <label>ShowTransactions</label>
+    <packageVersions>
+        <majorNumber>1</majorNumber>
+        <minorNumber>5</minorNumber>
+        <namespace>sf_chttr_apps</namespace>
+    </packageVersions>
+    <packageVersions>
+        <majorNumber>1</majorNumber>
+        <minorNumber>5</minorNumber>
+        <namespace>sf_com_apps</namespace>
+    </packageVersions>
+</ApexPage>
+
+>
+<!--<script  type="text/javascript" src="{!URLFOR($Resource.jquery,'')}" > </script>-->
+<apex:stylesheet value="{!URLFOR($Resource.treeView,'treeView/jquery.treeview.css')}" />
+<!--<apex:stylesheet value="{!URLFOR($Resource.treeView,'treeView/screen.css')}" />-->
+<apex:includeScript value="{!URLFOR($Resource.treeView,'treeView/jquery.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.treeView,'treeView/jquery.cookie.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.treeView,'treeView/jquery.treeview.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.treeView,'treeView/jquery.treeview.edit.js')}" />
+
+
+
+
+
+
+
+
+<style>
+    .inactivereport{        
+       text-decoration:none;
+       pointer-events: none;
+       cursor: default;
+    }
+    #handlebarContainer {
+        bottom: 36px;
+        height: auto;
+        left: 214px;
+        top: 86px;
+        width: 9px;
+    }
+    #dash th,#dash td{
+        padding:4px 5px;        
+    }
+    #dash th{
+        background:#ccc;
+        border-right: 1px solid #AAAAAA;
+    }
+    .list .headerRow th {
+        //border-bottom: 2px solid #CCCCCC;
+        white-space: normal;
+    }
+    th {
+        //border-bottom: 2px solid #CCCCCC;
+        white-space: normal;
+    }
+    .param{
+        padding-right:10px;        
+    }
+    .tabBorder {
+        border-collapse: collapse;
+    }
+    .tabBorder th {
+        border: 1px solid #CCC;
+    }
+    .tabBorder td {
+        border: 1px solid #CCC;
+    }
+    @import url(http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,600,300);
+
+/* Base Styles */
+#cssmenu,
+#cssmenu ul,
+#cssmenu li,
+#cssmenu a {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    list-style: none;
+    font-weight: normal;
+    text-decoration: none;
+    line-height: 1;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1em;
+    position: relative;
+}
+#cssmenu a {
+    line-height: 1.3;
+}
+
+#cssmenu {
+    width: 100%;
+    border-bottom: 4px solid #656659;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+#cssmenu > ul > li:first-child {
+    background: #66665e;
+    background: -moz-linear-gradient(#66665e 0%, #45463d 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #66665e), color-stop(100%, #45463d));
+    background: -webkit-linear-gradient(#66665e 0%, #45463d 100%);
+    background: linear-gradient(#66665e 0%, #45463d 100%);
+    border: 1px solid #45463d;
+    -webkit-border-radius: 3px 3px 0 0;
+    -moz-border-radius: 3px 3px 0 0;
+    border-radius: 3px 3px 0 0;
+}
+#cssmenu > ul > li:first-child > a {
+    padding: 15px 10px;
+    background: url(pattern.png) top left repeat;
+    border: none;
+    border-top: 1px solid #818176;
+    -webkit-border-radius: 3px 3px 0 0;
+    -moz-border-radius: 3px 3px 0 0;
+    border-radius: 3px 3px 0 0;
+    font-family: 'Ubuntu', sans-serif;
+    text-align: left;
+    font-size: 1.2em;
+    font-weight: 300;
+    text-shadow: 0 -1px 1px #000000;
+}
+#cssmenu > ul > li:first-child > a > span {
+    padding: 0;
+}
+#cssmenu > ul > li:first-child:hover {
+    background: #66665e;
+    background: -moz-linear-gradient(#66665e 0%, #45463d 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #66665e), color-stop(100%, #45463d));
+    background: -webkit-linear-gradient(#66665e 0%, #45463d 100%);
+    background: linear-gradient(#66665e 0%, #45463d 100%);
+}
+
+#cssmenu > ul > li {
+    background: #e94f31;
+    background: -moz-linear-gradient(#e94f31 0%, #d13516 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e94f31), color-stop(100%, #d13516));
+    background: -webkit-linear-gradient(#e94f31 0%, #d13516 100%);
+    background: linear-gradient(#e94f31 0%, #d13516 100%);
+}
+#cssmenu > ul > li:hover {
+    background: #e84323;
+    background: -moz-linear-gradient(#e84323 0%, #c33115 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e84323), color-stop(100%, #c33115));
+    background: -webkit-linear-gradient(#e84323 0%, #c33115 100%);
+    background: linear-gradient(#e84323 0%, #c33115 100%);
+}
+#cssmenu > ul > li > a {
+    font-size: .9em;
+    display: block;
+    background: url(menu_images/pattern.png) top left repeat;
+    color: #ffffff;
+    border: 1px solid #ba2f14;
+    border-top: none;
+    text-shadow: 0 -1px 1px #751d0c;
+}
+#cssmenu > ul > li > a > span {
+    display: block;
+    padding: 12px 10px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+#cssmenu > ul > li > a:hover {
+    text-decoration: none;
+}
+#cssmenu > ul > li.active {
+    border-bottom: none;
+}
+#cssmenu > ul > li.has-sub > a span {
+    background: url(menu_images/icon_plus.png) 96% center no-repeat;
+}
+#cssmenu > ul > li.has-sub.active > a span {
+    background: url(menu_images/icon_minus.png) 96% center no-repeat;
+}
+
+#cssmenu ul ul {
+    display: none;
+    background: #fff;
+    border-right: 1px solid #a2a194;
+    border-left: 1px solid #a2a194;
+}
+#cssmenu ul ul li {
+    padding: 0;
+    border-bottom: 1px solid #d4d4d4;
+    border-top: none;
+    background: #f7f7f7;
+    background: -moz-linear-gradient(#f7f7f7 0%, #ececec 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f7f7f7), color-stop(100%, #ececec));
+    background: -webkit-linear-gradient(#f7f7f7 0%, #ececec 100%);
+    background: linear-gradient(#f7f7f7 0%, #ececec 100%);
+}
+#cssmenu ul ul li:last-child {
+    border-bottom: none;
+}
+#cssmenu ul ul a {
+    padding: 10px 10px 10px 25px;
+    display: block;
+    color: #676767;
+    font-size: .9em;
+    font-weight: normal;
+}
+#cssmenu ul ul a:before {
+    content: '\00BB';
+    position: absolute;
+    left: 10px;
+    color: #e94f31;
+}
+#cssmenu ul ul a:hover {
+    color: #e94f31;
+}
+
+#coldiv1,#coldiv2,#coldiv3,#coldiv4{
+    float:left;
+   
+}
+</style>
+
+<script>    
+    var allListValues= new Array();
+    $( document ).ready(function() {       
+       buildLeftNav();
+       fillInitialValues();
+       setinactivelink();
+       //setTreeView();
+       setTimeout(function(){setChartView();},2000);
+       if('{!$CurrentPage.parameters.runReport}' == 'true'){
+            showSideBar();
+        }  
+    });  
+    function setChartView(){
+        /*
+        var i=2;
+        $('#chartData1').find('.vf-reset:gt(0)').each(function(){     
+            $('#chartData'+i).html($(this).html());
+            $(this).html('');
+            
+            i +=1;
+        });
+        */
+        var i=2;
+        var j=1;
+        while(true){
+            i = j+1;
+            var flag = false;
+            if($('#chartData'+j).find('.vf-reset').size() > 0 && $('#chartData'+j).find('.vf-reset').size() < 2){
+                break;
+            }
+            $('#chartData'+j).find('.vf-reset:gt(0)').each(function(){     
+                flag = true;
+                while(true){
+                    if($('#chartData'+i).hasClass('chart')){
+                        $(this).appendTo('#chartData'+i)
+                        i +=1;
+                        break;            
+                    }            
+                    i +=1;
+                }            
+            });            
+            if(flag == true){
+                j +=1;
+                break;  
+            }
+            j += 1;
+            if ($('#chartData'+j).size() == 0){
+                break;
+            }               
+            
+        }
+    }
+    function buildLeftNav(){
+       $('#cssmenu > ul > li:has(ul)').addClass("has-sub");  
+       $('#cssmenu > ul ').slideDown('normal'); 
+       $('#cssmenu > ul > li > a').each(function() {
+            var checkElement = $(this).next();
+            if((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
+                $('#cssmenu ul ul:visible').slideUp('normal');
+                checkElement.slideDown('normal');
+            }
+       });
+        
+       
+      $('#cssmenu > ul > li > a').click(function() {
+
+            var checkElement = $(this).next();
+        
+            $('#cssmenu li').removeClass('active');
+            $(this).closest('li').addClass('active');   
+        
+            if((checkElement.is('ul')) && (checkElement.is(':visible'))) {
+                $(this).closest('li').removeClass('active');
+                checkElement.slideUp('normal');
+            }
+        
+            if((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
+                $('#cssmenu ul ul:visible').slideUp('normal');
+                checkElement.slideDown('normal');
+            }
+        
+            if (checkElement.is('ul')) {
+                return false;
+            } else {
+                return true;    
+            }
+        }); 
+    
+    } 
+    function setTreeView(){
+        $("#browser").treeview();
+        var linkid = '{!linkId}';
+       // alert(linkid);
+        if(linkid != ''){
+            if($("#"+linkid).parent().parent().parent().parent().hasClass("closed") &&
+                $("#"+linkid).parent().parent().parent().parent().hasClass("expandable")
+            ){
+            
+                $("#"+linkid ).parent().parent().parent().parent().removeClass("closed");
+                $("#"+linkid ).parent().parent().parent().parent().removeClass("expandable");
+                
+                $("#"+linkid ).parent().parent().parent().parent().addClass("collapsable");
+                $("#"+linkid).parent().parent().parent().css("display","block");
+              
+            }
+        }
+    }
+
+    function setinactivelink(){
+       var linkid = '{!linkId}';  
+       if(linkid != ''){
+           $("#"+linkid).css("color","#EF2B2D");
+           $("#"+linkid).addClass("inactivereport"); 
+       }
+       
+    }  
+    function setPageDisplayFormat(){
+       setinactivelink();
+       buildLeftNav();
+       showSideBar();
+       // setTreeView();
+    }
+    function showSideBar(){
+        
+        if ($("#sidebarDiv").is(":visible") == true) {
+            $("#handlebarContainer").css("left","0px");
+            $("#sidebarDiv").fadeOut(500);
+            $('#sideBarTd').css("width","0px");
+        }else{
+            $("#handlebarContainer").css("left","214px");
+            $("#sidebarDiv").fadeIn(500);
+            $('#sideBarTd').css("width","220px");
+        }
+    }
+    function hideReport(index){
+        
+        if ($('#tab'+index).is(":visible") == true) {
+            $('#tab'+index).toggle();
+            $('#collapsible'+index).hide();
+            $('#explandable'+index).show();  
+        }else{
+            $('#tab'+index).toggle();
+            $('#collapsible'+index).show();
+            $('#explandable'+index).hide();   
+        }
+    }
+    function fillAllListValues(){
+         $('.Period_Name').find('option').each(function(){
+                allListValues.push($(this).val());
+        });
+    } 
+    function showOtherOptions(value,label){
+        if($(value).val() == 'other'){
+            $(value).next().css("display",'block'); 
+            $(value).next().val('');             
+        }else{
+            $(value).next().css("display",'none');
+            $(value).next().val('');
+        }
+        if(label =='Period Year' || label =='*Period Year'){
+            if($.browser.msie) {
+             // JQuery show works for all browsers but IE. This is a workaround.
+                $('.Period_Name').css({"visibility":"visible"});
+            }
+            $('.Period_Name').val('');
+            if($(value).val() !='' && $(value).val() != 'other'){
+                 var year =$(value).val();
+                 var matchingCars = year.substr(year.length - 2);
+                 
+                 //alert(matchingCars);
+                 $('.Period_Name').find('option').each(function(){
+                     if($(this).val() == ''){
+                         $(this).filter( "span > option" ).unwrap();
+                         return;
+                     }
+                     var optionLastChaars = $(this).val().substr($(this).val().length - 2);
+                     if(optionLastChaars == matchingCars){
+                         //alert('y');
+                         $(this).filter( "span > option" ).unwrap();
+                     }else{
+                          //alert('n');
+                         $(this).filter( ":not(span > option)" ).wrap( "<span>" ).parent().hide();
+                     }
+                 });
+            }else{
+                
+                 $('.Period_Name').find('option').each(function(){
+                         $(this).filter( "span > option" ).unwrap();      
+                 });
+            
+            }
+        }
+    }
+    function fillInitialValues(){
+        if($(".Period_Year").length > 0){
+             var year =  $(".Period_Year").val();
+             var matchingCars = year.substr(year.length - 2);
+             //alert(matchingCars);
+             
+             $('.Period_Name').find('option').each(function(){                     
+                 if($(this).val() == ''){
+                     $(this).filter( "span > option" ).unwrap();
+                     return;
+                 }
+                 var optionLastChaars = $(this).val().substr($(this).val().length - 2);
+                 if(optionLastChaars == matchingCars){
+                     $(this).filter( "span > option" ).unwrap();                     
+                 }else{
+                     $(this).filter( ":not(span > option)" ).wrap( "<span>" ).parent().hide();                     
+                 }
+             });
+         }
+    }
+</script>
+
+<apex:sectionHeader subtitle="{!displayName}" />
+
+ <apex:form id="frm" >
+      <apex:outputPanel id="exportFun">
+         <script>
+             function downloadTransactionCSV(name,displayName){  
+                 if(displayName == null){
+                     window.open('/apex/DownloadTransactionsCSV?name='+name+'&displayName={!parameterDisplayName}&reportParam={!parametersString}&export=true','_blank');
+                 }else{
+                     window.open('/apex/DownloadTransactionsCSV?name='+name+'&displayName='+displayName+'&reportParam={!parametersString}&export=true','_blank');
+                 }              
+             } 
+             function downloadTransactionHTML(name,displayName){
+                 if(displayName == null){
+                     window.open('/apex/DownloadTransactionHTML?name='+name+'&displayName={!parameterDisplayName}&reportParam={!parametersString}export=true','_blank');
+                 }else{
+                     window.open('/apex/DownloadTransactionHTML?name='+name+'&displayName='+displayName+'&reportParam={!parametersString}&export=true','_blank');
+                 }
+                 
+             }
+             function downloadTransactionPDF(name,index,displayName,Page_Orientation){
+                 if(index == null){
+                     //a = $("#pg\\:frm\\:t_block\\:orien").val();
+                     window.open('/apex/DownloadTransactionPDF?name='+name+'&orien={!Page_Orientation}&displayName={!parameterDisplayName}&reportParam={!parametersString}&export=true','_blank');           
+                 }else{
+                     //a = $("#orien"+index).val();
+                     window.open('/apex/DownloadTransactionPDF?name='+name+'&orien='+Page_Orientation+'&displayName='+displayName+'&reportParam={!parametersString}&export=true','_blank');    
+                 }
+                 
+             }
+         </script>
+     </apex:outputPanel>
+     <apex:pageBlock id="t_block" >
+     
+     <table >
+         <tr>
+             <td id="sideBarTd" valign="top"  width="220px">
+                <div id="buttendiv">
+                <a style="margin-left: 12px;margin-right: 10px;" class="zen handlebarContainer" href="javascript:void(0);" id="handlebarContainer" onClick="showSideBar();" title="Click to Close Sidebar [Alt+S]">
+                <span class="zen-assistiveText">Click to Close Sidebar</span><span class="indicator" id="pinIndicator"></span>
+                <span class="indicator" id="pinIndicator2"></span>
+                <span class="pinBox" id="handle">&nbsp;</span></a>
+                </div> 
+                <div class="collapsible sidebar" id="sidebarDiv" >
+                <div class="quickCreateModule sidebarModule">
+                <div class="sidebarModuleHeader brandPrimaryBgr">
+                </div>
+                <div class="sidebarModuleBody" >
+                  
+                    <div id="cssmenu">
+                            <ul>
+                                <apex:repeat value="{!groupList}" var="gl" >
+                                    <li><a href="#"><span>{!gl}</span></a>
+                                        <ul >
+                                            <apex:repeat value="{!groupMap[gl]}" var="gm" >
+                                                <li><span class="file"><a id="{!gm.id}" style="text-decoration:none;"  href='/apex/ShowTransactions?name={!gm.Report_Name__c}&displayName={!gm.Display_Name__c}'>{!gm.Display_Name__c}</a></span></li>
+                                            </apex:repeat>
+                                        </ul>  
+                                    </li>    
+                                 </apex:repeat>
+                                        
+                            </ul>
+                    </div>            
+                </div>
+                </div>
+                </div>
+   
+             </td>
+             <td valign="top" >                                    
+                 <apex:outputPanel rendered="{!IF(reportName != '',true,false)}" > 
+                 <div style="margin-left:10px;">
+                    <input type="hidden" id="pginput" value="1"/>                 
+                    <center>
+                        <apex:actionStatus id="status2">
+                            <apex:facet name="start">
+                                <div style="width: 500px;">
+                                    <img src="/img/loading24.gif" style="vertical-align:middle;"/>
+                                    <span style="margin-left: 10px; font-size: 12px; font-weight: bold; color: #000000;">Please wait while we get the records...</span>
+                                </div>
+                            </apex:facet>
+                        </apex:actionStatus>
+                    </center>
+                    
+                        <br/>
+                    <br/>
+                    <apex:pageBlockSection columns="1">
+                       <!-- {!columnFormatMap}-->
+                        <apex:outputPanel rendered="{!paramModel.size >0}">
+                            <h1 style="font-size:16px;">Report Options:</h1><br/><br/>
+                            <table>                                <tr >
+                                    
+                                    <apex:repeat value="{!paramModel}" var="pm">
+                                        <td valign="top" Class="param">
+                                            <apex:outputPanel >
+                                                <div>                                                
+                                                    <apex:outputLabel value="{!pm.param.Label__c}"></apex:outputLabel><br/>
+                                                    <div class="{!pm.requiredInput}"  >
+                                                        <div class="{!pm.requiredBlock}"></div>
+                                                        <apex:selectList styleClass="{!IF(pm.param.Label__c=='Period Name' || pm.param.Label__c=='*Period Name' ,'Period_Name',(IF(pm.param.Label__c=='Period Year' || pm.param.Label__c=='*Period Year','Period_Year','')))}" onChange="showOtherOptions(this,'{!pm.param.Label__c}'); return false;" size="1" value="{!pm.param.Default_Value__c}" >                                                        
+                                                            <apex:selectOptions value="{!pm.paramList}" ></apex:selectOptions>                                                       
+                                                        </apex:selectList>
+                                                        <apex:inputText style="display:none" value="{!pm.otherValue}"/>       
+                                                    </div>
+                                                </div>
+                                            </apex:outputPanel>     
+                                        </td>
+                                    </apex:repeat>
+                                </tr>
+                            </table>
+                        </apex:outputPanel>
+                    </apex:pageBlockSection>
+                    
+                    <apex:outputPanel ><br/>
+                        <apex:commandButton style="margin-left:12px;" value="Run Report"  action="{!filterValues}" status="status2" reRender="frm" oncomplete="setPageDisplayFormat();"  rendered="{! linkId != ''}" />
+                        <br/><br/><br/>
+                    </apex:outputPanel>
+                    
+                    <!--
+                    <apex:outputPanel id="topLink">                        
+                        <apex:outputPanel rendered="{!IF(rowsx.size>0,true,false)}" >
+                            <apex:commandLink style="color:#EF2B2D;" value="< Previous" rendered="{!!flag}"  status="status2" action="{!previousPage}" oncomplete="setPageDisplayFormat();" reRender="frm" />             
+                            <apex:outputText style="color:#c5c5c5;" rendered="{!flag}" value="< Previous" />&nbsp;&nbsp;
+                            <apex:commandLink style="color:#EF2B2D;" rendered="{!!flag2}" value="Next >" status="status2" action="{!nextPage}" oncomplete="setPageDisplayFormat();" reRender="frm" />            
+                            <apex:outputText style="color:#c5c5c5;" rendered="{!flag2}" value="Next >" />
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionCSV('{!reportName}',null,null); return false;" >
+                                 <apex:image value="{!$Resource.csv}" />
+                            </apex:commandLink>
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionPDF('{!reportName}',null,null,null); return false;" >
+                                <apex:image value="{!$Resource.pdf_icon}" />
+                            </apex:commandLink>
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionHTML('{!reportName}',null,null); return false;" >
+                                <apex:image value="{!$Resource.html_icon}" />
+                            </apex:commandLink> 
+                            <apex:selectList id="orien" style="margin-left:10px;" size="1" value="{!selectedOrientation}">
+                                <apex:selectOptions value="{!orientaionList}" ></apex:selectOptions>
+                            </apex:selectList>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    <br/><br/>
+                    -->
+                    <apex:actionFunction name="refresh" reRender="frm" status="load" oncomplete="setinactivelink();" />
+                    <apex:actionStatus id="load" startText="loading..." startStyle="color:red"></apex:actionStatus>
+                    <apex:pageMessages escape="false" ></apex:pageMessages>
+                    
+                    <apex:pageBlockSection title="Bar Chart" rendered="{!IF(reportName != '' && data.size>0,true,false)}"  >                        
+                       
+                        <apex:outputPanel ><br/><br/><br/>
+                             <apex:chart height="400" width="800px;" data="{!data}">
+                                  <apex:legend position="right"/>
+                                    <apex:axis minimum="0" type="Numeric" position="left" fields="{!dataStr}"
+                                        title="{!ficColumns[0].YAxisLabel__c}" grid="true"/>
+                                    <apex:axis type="Category" position="bottom" fields="name"
+                                        title="{!ficColumns[0].XAxisLabel__c}">
+                                        <apex:chartLabel rotate="90"/> 
+                                    </apex:axis>
+                                
+                                  <apex:barSeries title="{!YAxisLabels}" orientation="vertical" axis="left"
+                                    xField="name" yField="{!dataStr}">
+                                    <apex:chartTips height="20" width="120"/>
+                                  </apex:barSeries>
+                               </apex:chart>
+                         </apex:outputPanel>
+                        
+                    </apex:pageBlockSection>
+                            
+                    <apex:pageBlockSection columns="1" title="Generated Report:" rendered="{!IF(rowsx.size>0,true,false)}" id="statusMessage"  >  
+                       
+                        <!-- <apex:pageBlockTable rendered="{!IF(rowsx.size>0,true,false)}" value="{!rowsx}" var="row" id="pbt" rowClasses="odd,even" styleClass="tableClass">                
+                            <apex:column value="{!row.columns[0]}" headerValue="Transaction Number" />
+                            <apex:column value="{!row.columns[1]}" headerValue="Order Number"  />
+                            <apex:column value="{!row.columns[2]}" headerValue="Invoice Number"  />
+                            <apex:column value="{!row.columns[3]}" headerValue="Source currency Code"  />
+                            <apex:column value="{!row.columns[4]}" headerValue="Operating Currency Code"  />
+                            <apex:column value="{!row.columns[5]}" headerValue="Transaction Status"  />
+                            <apex:column value="{!row.columns[6]}" headerValue="Transaction Type"  />
+                            <apex:column value="{!row.columns[7]}" headerValue="Transaction Amount"  />
+                            <apex:column value="{!row.columns[8]}" headerValue="Creation Date"  />
+                             </apex:pageBlockTable>
+                            <colgroup span="9"></colgroup> 
+                         -->
+                           
+                         <apex:outputPanel >
+                         <div style="overflow-y:auto;overflow-x:auto;width:{!headerValues.size*150}px;height:auto;">
+                         <div style="width:{!headerValues.size*150}px;">
+                         <table width="100%" class="list tableClass" cellspacing="0" cellpadding="0" border="0">
+                             <thead class="rich-table-thead">
+                                <tr class="headerRow ">
+                                     <apex:repeat value="{!headerValues}" var="cl" >
+                                         <th class="headerRow " colspan="1" scope="col" style="width:{!cl.width};text-align:{!cl.textAlignment}">
+                                             <apex:outputText escape="false" value="{!cl.headerValue}" ></apex:outputText>
+                                         </th>
+                                     </apex:repeat>
+                                </tr>
+                             </thead>
+                             <tbody>
+                                 <apex:repeat value="{!rowsx}" var="row">  
+                                     <tr class="dataRow even odd first" onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}" onmouseout="if (window.hiOff){hiOff(this);} " onmouseover="if (window.hiOn){hiOn(this);} ">
+                                         <apex:repeat value="{!row.columnsList}" var="cl" >                                
+                                             <td class="dataCell " colspan="1" align="{!cl.textAlignment}" >{!cl.columnValue}</td>  
+                                         </apex:repeat> 
+                                     </tr> 
+                                </apex:repeat>  
+                            </tbody>                      
+                         </table>
+                         </div>
+                         </div>
+                         </apex:outputPanel>
+                         </apex:pageBlockSection>
+                   
+                    <br/>
+                    <apex:outputPanel id="bottomLink">
+                        <apex:outputPanel rendered="{!IF(rowsx.size>0,true,false)}" >
+                            <apex:commandLink style="color:#EF2B2D;" value="< Previous" rendered="{!!flag}"  status="status2" action="{!previousPage}" oncomplete="setPageDisplayFormat();" reRender="frm" />             
+                            <apex:outputText style="color:#c5c5c5;" rendered="{!flag}" value="< Previous" />&nbsp;&nbsp;
+                            <apex:commandLink style="color:#EF2B2D;" rendered="{!!flag2}" value="Next >" status="status2" action="{!nextPage}" oncomplete="setPageDisplayFormat();" reRender="frm" />            
+                            <apex:outputText style="color:#c5c5c5;" rendered="{!flag2}" value="Next >" />
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionCSV('{!reportName}'); return false;" >
+                                 <apex:image value="{!$Resource.csv}" />
+                            </apex:commandLink>
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionPDF('{!reportName}',null); return false;" >
+                                <apex:image value="{!$Resource.pdf_icon}" />
+                            </apex:commandLink>
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionHTML('{!reportName}'); return false;" >
+                                <apex:image value="{!$Resource.html_icon}" />
+                            </apex:commandLink>                             
+                        </apex:outputPanel>                        
+                        <apex:outputPanel style="float:right;" id="pgSize">
+                            <apex:outputPanel rendered="{!IF(rowsx.size>0,true,false)}" >
+                                <b>Records per page </b>
+                                <apex:selectList value="{!selectedSize}" size="1" >
+                                    <apex:selectOptions value="{!sizeList}"></apex:selectOptions>
+                                </apex:selectList>
+                                <apex:commandButton value="Go" action="{!changePageSize}" status="status2" reRender="frm" oncomplete="setPageDisplayFormat();" />
+                            </apex:outputPanel>
+                        </apex:outputPanel> 
+                    </apex:outputPanel><br/><br/><br/>
+                    
+             </div>
+             </apex:outputPanel>
+             
+             <apex:outputPanel id="chart" rendered="{!IF(reportName == '',true,false)}">
+             <apex:pageMessages escape="false" ></apex:pageMessages>
+             <div style="margin-left:20px;">                                        
+                 <center>
+                     <apex:actionStatus id="status3">
+                         <apex:facet name="start">
+                             <div style="width: 500px;">
+                                 <img src="/img/loading24.gif" style="vertical-align:middle;"/>
+                                 <span style="margin-left: 10px; font-size: 12px; font-weight: bold; color: #000000;">Please wait while we get the records...</span>
+                             </div>
+                         </apex:facet>
+                     </apex:actionStatus>
+                 </center>
+                 <br/><br/>
+                 <apex:actionFunction name="previous" action="{!previousPageData}" reRender="dashboard,topLinks" status="status3" >
+                     <apex:param name="arg" value="" assignTo="{!reportIndex}" />
+                 </apex:actionFunction>
+                 
+                 <apex:actionFunction name="next" action="{!nextPageData}" reRender="dashboard,topLinks" status="status3" >
+                     <apex:param name="arg" value="" assignTo="{!reportIndex}" />
+                 </apex:actionFunction>
+                 
+                 <apex:actionFunction name="changePageSize" action="{!changeMultiplePageSize}" reRender="dashboard,topLinks" status="status3" >
+                     <apex:param name="arg" value="" assignTo="{!reportIndex}" />
+                 </apex:actionFunction>
+                 
+                 <apex:actionFunction name="runReport" action="{!runReport}" status="status3" reRender="chart,dashboard,topLinks,exportFun" /> 
+                 <apex:pageBlockSection columns="1" >
+                     <!--
+                     <apex:outputPanel >                     
+                         <h1 style="font-size:16px;">Report Options:</h1><br/><br/>                         
+                         <table>
+                             <tr>
+                                 <td valign="top" Class="param">
+                                     <apex:outputPanel >
+                                         <apex:outputLabel value="Participant Name"></apex:outputLabel><br/>
+                                         <div>
+                                             <div class="requiredInput ">
+                                                 <div class="requiredBlock "></div>                                         
+                                                 <apex:selectList onChange="showOtherOptions(this); return false;" value="{!participantName}" size="1">
+                                                     <apex:selectOptions value="{!participantList}" ></apex:selectOptions>
+                                                 </apex:selectList>
+                                                 <apex:inputText style="display:none;" value="{!participantNameOther}" />
+                                             </div>
+                                         </div>
+                                     </apex:outputPanel>
+                                 </td>
+                                 <td valign="top" Class="param">
+                                     <apex:outputPanel >
+                                         <apex:outputLabel value="Period Year "></apex:outputLabel><br/>
+                                         <div>
+                                             <div class="requiredInput ">                                         
+                                                 <div class="requiredBlock "></div>                                         
+                                                 <apex:selectList onChange="showOtherOptions(this); return false;" value="{!periodYear}" size="1">
+                                                     <apex:selectOptions value="{!periodYearList}" ></apex:selectOptions>
+                                                 </apex:selectList>
+                                                 <apex:inputText style="display:none;" value="{!periodYearOther}" />
+                                             </div>
+                                         </div>
+                                     </apex:outputPanel>
+                                 </td>
+                                 <td valign="top" Class="param">
+                                     <apex:outputPanel >
+                                         <apex:outputLabel value="Period Name"></apex:outputLabel><br/>
+                                         <div>
+                                             <div class="requiredInput ">                                         
+                                                 <div class="requiredBlock "></div>  
+                                                 <apex:selectList onChange="showOtherOptions(this); return false;" value="{!periodName}" size="1">
+                                                     <apex:selectOptions value="{!periodNameList}" ></apex:selectOptions>
+                                                 </apex:selectList>                                       
+                                                 <apex:inputText style="display:none;" value="{!periodNameOther}" />
+                                             </div>
+                                         </div>
+                                     </apex:outputPanel>
+                                 </td>                                                                        
+                             </tr>
+                         </table>                     
+                     </apex:outputPanel>
+                     -->
+                     <apex:outputPanel rendered="{!paramModel.size >0}">
+                         <h1 style="font-size:16px;">Report Options:</h1><br/><br/>
+                         <table>
+                             <tr >
+                                 <apex:repeat value="{!paramModel}" var="pm">
+                                     <td valign="top" Class="param">
+                                         <apex:outputPanel >
+                                             <div>
+                                                 <apex:outputLabel value="{!pm.param.Label__c}"></apex:outputLabel><br/>
+                                                 <div class="{!pm.requiredInput}"  >
+                                                     <div class="{!pm.requiredBlock}"></div>
+                                                     <apex:selectList styleClass="{!IF(pm.param.Label__c=='Period Name','Period_Name',(IF(pm.param.Label__c=='Period Year' || pm.param.Label__c=='*Period Year','Period_Year','')))}" onChange="showOtherOptions(this,'{!pm.param.Label__c}'); return false;" size="1" value="{!pm.param.Default_Value__c}" >                                                        
+                                                         <apex:selectOptions value="{!pm.paramList}" ></apex:selectOptions>                                                       
+                                                     </apex:selectList>
+                                                     <apex:inputText style="display:none" value="{!pm.otherValue}"/>       
+                                                 </div>
+                                             </div>
+                                         </apex:outputPanel>     
+                                     </td>
+                                 </apex:repeat>
+                             </tr>
+                         </table>
+                     </apex:outputPanel>      
+                 </apex:pageBlockSection>
+                 
+                 <apex:outputPanel >
+                    <br/>
+                    <apex:commandButton style="margin-left:12px;" value="Run Report" onClick="runReport(); return false;"  />
+                </apex:outputPanel> 
+                <br/><br/><br/>      
+                 
+                 <apex:outputPanel >
+                 <!--<table border="1" >-->
+                 <apex:variable var="index" value="{!1}" />
+                 <apex:variable var="columnIndex" value="{!1}"/>
+                 <table width="1520" ><tr><td style="width:1520px;">
+                 <apex:repeat value="{!ccList}" var="rmd" >                     
+                     <div id="coldiv{!columnIndex}" style="width:750px;border: gray solid 1px;">
+                     <table width="700px" style="padding-left:10px;padding-right:10px;">
+                     <tr>
+                         <th style="display:none;width:720px;" id="explandable{!index}"><h1 style="font-size:16px;"><a href="#" style="text-decoration:none;" onClick="hideReport('{!index}');return false;">{!rmd.displayName} &nbsp;&nbsp; <apex:image value="{!$Resource.explandable}" /></a></h1><br/><br/></th>
+                         <th id="collapsible{!index}" style="width:700px;"><h1 style="font-size:16px;"><a href="#" style="text-decoration:none;" onClick="hideReport('{!index}');return false;">{!rmd.displayName} &nbsp;&nbsp; <apex:image value="{!$Resource.collapsible}" /></a></h1><br/><br/></th>
+                         
+                     </tr>
+                     <tr id="tab{!index}">                     
+                     <!--<td style="margin-top:50px;" valign="top">-->
+                     <td style="margin-top:50px;" valign="top" class="{!rmd.clsName}" id="chartData{!index}">
+                                       
+                    <!-- <apex:outputPanel id="dashboard" rendered="{!IF(rmd.rowList.size>0,true,false)}" >  -->
+                        <apex:outputPanel id="dashboard" rendered="{!IF(rmd.chartData.rowList==null,true,false)}" >
+                         <div style="height:380px;">
+                         <div style="overflow-y:auto;overflow-x:auto;width:700px;height:auto;">
+                         
+                         <table style="width:{!rmd.headerValues.size*150}px;" id="dash" class="tabBorder" cellspacing="0" cellpadding="0" >
+                             <thead >
+                                <tr >
+                                     <apex:repeat value="{!rmd.headerValues}" var="cl" >
+                                         <th  colspan="1" scope="col" style="width:{!cl.width};text-align:{!cl.textAlignment}" >
+                                             <apex:outputText escape="false" value="{!cl.headerValue}" ></apex:outputText>                                             
+                                         </th>
+                                     </apex:repeat>
+                                </tr>
+                             </thead>
+                             <tbody>
+                                 <apex:repeat value="{!rmd.rowList}" var="row">  
+                                     <tr  onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}" onmouseout="if (window.hiOff){hiOff(this);} " onmouseover="if (window.hiOn){hiOn(this);} ">
+                                         <apex:repeat value="{!row.columnsList}" var="cl" >                                
+                                             <td valign="top" align="{!cl.textAlignment}" colspan="1">{!cl.columnValue}</td>  
+                                         </apex:repeat> 
+                                     </tr> 
+                                </apex:repeat>  
+                             </tbody>                      
+                         </table>
+                         </div>
+                         </div>                        
+                     </apex:outputPanel>
+                     
+                     <apex:outputPanel >
+                        <!-- 
+                        <apex:outputPanel id="pgSize">
+                            <apex:outputPanel rendered="{!IF(rmd.rowList.size>0,true,false)}" >
+                                <b>Records per page </b>
+                                <apex:selectList value="{!rmd.selectedSize}" size="1" >
+                                    <apex:selectOptions value="{!rmd.sizeList}"></apex:selectOptions>
+                                </apex:selectList>
+                                <apex:commandButton value="Go" onClick="changePageSize('{!rmd.index}'); return false" status="status3" reRender="dashboard"  />
+                            </apex:outputPanel>
+                            <br/><br/>
+                        </apex:outputPanel>
+                         -->
+                         
+                       <!-- <apex:outputPanel style="float:right;" id="topLinks" rendered="{!IF(rmd.rowList.size>0,true,false)}" >-->
+                       <apex:outputPanel style="float:right;" id="topLinks" rendered="{!IF(rmd.chartData.rowList==null,true,false)}" >
+                           <br/><br/>
+                            <apex:commandLink onClick="previous('{!rmd.index}'); return false;" style="color:#EF2B2D;" value="< Previous" rendered="{!!rmd.flag1}"  />
+                            <apex:outputText style="color:#c5c5c5;" rendered="{!rmd.flag1}" value="< Previous" />&nbsp;&nbsp;
+                            <apex:commandLink onClick="next('{!rmd.index}'); return false;" style="color:#EF2B2D;" rendered="{!!rmd.flag2}" value="Next >"  />            
+                            <apex:outputText style="color:#c5c5c5;" rendered="{!rmd.flag2}" value="Next >" />
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionCSV('{!rmd.reportName}','{!rmd.parameterDisplayName}'); return false;" >
+                                 <apex:image value="{!$Resource.csv}" />
+                            </apex:commandLink>
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionPDF('{!rmd.reportName}',{!index},'{!rmd.parameterDisplayName}','{!rmd.Page_Orientation}'); return false;" >
+                                <apex:image value="{!$Resource.pdf_icon}" />
+                            </apex:commandLink>
+                            <apex:commandLink style="margin-left:10px;" onClick="downloadTransactionHTML('{!rmd.reportName}','{!rmd.parameterDisplayName}'); return false;" >
+                                <apex:image value="{!$Resource.html_icon}" />
+                            </apex:commandLink>
+                            <!--
+                            <select style="margin-left:10px;" size="1" id="orien{!index}" >   
+                                <option value="portrait">Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                            -->                         
+                        </apex:outputPanel> 
+                        <br/><br/>     
+                    </apex:outputPanel>
+                     <!--<br/><br/>-->
+                    <!--</td>
+                    
+                     
+                     <td style="margin-top:50px;" valign="top" class="{!rmd.clsName}" id="chartData{!index}">   -->
+                     
+                     <apex:outputPanel rendered="{!IF(rmd.chartData.rowList!=null,true,false)}" >
+                         
+                         <apex:chart height="400px" width="700px;" data="{!rmd.chartData.ChartValues}">                             
+                              <apex:legend position="right"/>
+                                    <apex:axis minimum="0" type="Numeric" position="left" fields="{!deafult}{!rmd.dataStr}"
+                                        title="{!rmd.chartData.yLabel}" grid="true"/>
+                                    <apex:axis type="Category" position="bottom" fields="name"
+                                        title="{!rmd.chartData.xLabel}">
+                                        <apex:chartLabel rotate="90"/> 
+                                    </apex:axis>
+                                
+                                  <apex:barSeries title="{!rmd.YAxisLabels}" orientation="vertical" axis="left"
+                                    xField="name" yField="{!rmd.dataStr}">
+                                    <apex:chartTips height="20" width="120"/>
+                                  </apex:barSeries>
+                          </apex:chart>                        
+                          
+                     </apex:outputPanel>
+                     
+                     </td>                     
+                     </tr>
+                     </table>
+                     
+                     <apex:variable var="index" value="{!index+1}"/>
+                     <apex:variable var="columnIndex" value="{!columnIndex+1}"/> 
+                     </div>
+                     <apex:outputpanel rendered="{!IF(columnIndex==3,true,false)}">
+                     <div style="clear:both;"></div>
+                     </apex:outputpanel>
+                 </apex:repeat>
+                 </td></tr></table>
+                 <!--</table> -->                                 
+                 </apex:outputPanel> 
+                 
+                 
+             </div>
+             </apex:outputPanel>
+             </td>
+         </tr>         
+     </table> 
+     </apex:pageBlock>  
+</apex:form>
+
+</apex:page>

@@ -1,0 +1,40 @@
+<!--
+    Name : DownloadTransactionPDF
+    Author : CloudSPM
+    Date : December 10, 2013
+    Description : This Page is download PDF file of transaction records from oracle fusion service.
+    
+-->
+<apex:page id="pg" name="{!$CurrentPage.parameters.displayName}" renderAs="PDF"  controller="TransactionController" applyBodyTag="false" action="{!executeReport}" showHeader="false" sidebar="false" >
+    <head>
+        <script>
+        </script>
+        <style>
+            @page{
+                size: {!$CurrentPage.parameters.orien};                
+            }
+        </style>
+    </head>
+    <apex:outputPanel style="width:500px;" rendered="{!IF(rowsxCompleteData.size>0,true,false)}" >
+        <table width="100%" style="font-size:65%;" class="list tableClass" cellspacing="0" cellpadding="0" border="1">
+            <thead class="rich-table-thead">
+                <tr class="headerRow ">
+                    <apex:repeat value="{!headerValues}" var="cl" >
+                        <th class="headerRow " colspan="1" scope="col">
+                            <div>{!cl.headerValue}</div>
+                        </th>
+                    </apex:repeat>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!rowsxCompleteData}" var="row">  
+                    <tr class="dataRow even odd first" onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}" onmouseout="if (window.hiOff){hiOff(this);} " onmouseover="if (window.hiOn){hiOn(this);} ">
+                        <apex:repeat value="{!row.columns}" var="cl" >                                
+                            <td class="dataCell " colspan="1">{!cl}</td>  
+                        </apex:repeat> 
+                    </tr> 
+                </apex:repeat>  
+            </tbody>                      
+        </table>
+        </apex:outputPanel>
+</apex:page>

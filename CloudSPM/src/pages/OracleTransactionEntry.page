@@ -1,0 +1,58 @@
+<!--*******************************************************************
+* File Name : OracleTransactionEntry
+* Description : Page for manual Oracle Transaction Entry.
+* Copyright : CloudSPM
+******************************************************************** -->
+
+<apex:page controller="OracleTransactionEntryController" tabStyle="Transaction_Entry__tab" docType="html-5.0">
+	<apex:form id="form">
+		<apex:pageBlock title="Create Transaction" tabStyle="Transaction_Entry__tab" mode="edit">
+			<apex:pageBlockButtons > 
+				<apex:commandButton action="{!saveAction}" value=" Save " reRender="form"/>
+				<button type="button" onClick="location.reload(); " class="btn"> Clear </button>
+			</apex:pageBlockButtons>
+			<apex:pageMessages />
+			<apex:pageBlockSection title="General Information" columns="2">
+				<apex:repeat value="{!oracleFieldList}" var="oracleField">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel value="{!oracleField.label}" />
+						
+						<apex:outputPanel layout="block" styleClass="requiredInput">
+                           <apex:outputPanel layout="block" styleClass="requiredBlock" rendered="{!oracleField.notNull}"/>
+
+							<apex:selectList value="{!oracleField.value}" required="{!oracleField.notNull}" rendered="{!IF(oracleField.lookup = null, false, true)}" size="1" style="width:150px">
+								<apex:selectOptions value="{!selectLists[oracleField.lookup + oracleField.lookupInputColumn]}"/>
+							</apex:selectList>
+						
+							<apex:outputPanel rendered="{!IF(oracleField.lookup = null, true, false)}">
+								<!-- Text Input -->
+								<apex:outputPanel rendered="{!IF(oracleField.dataType = 'VARCHAR2', true, false)}">
+									<!-- Input with Length -->
+									<apex:input type="text" html-maxlength="{!oracleField.length}" label="{!oracleField.label}" value="{!oracleField.value}" required="{!oracleField.notNull}" style="width:148px" rendered="{!IF(oracleField.length = null, false, true)}"/>
+									
+									<!-- Input without Length -->
+									<apex:input type="text" label="{!oracleField.label}" value="{!oracleField.value}" required="{!oracleField.notNull}" style="width:148px" rendered="{!IF(oracleField.length = null, true,  false)}"/> 
+								</apex:outputPanel>
+								
+								<!-- Number Input -->
+								<apex:outputPanel rendered="{!IF(oracleField.dataType = 'NUMBER', true, false)}">
+									<!-- Input with Length -->
+									<apex:input type="text" html-oninvalid="setCustomValidity('Please enter a valid Number')" html-oninput="setCustomValidity('')"  html-pattern="^[0-9]+$" html-maxlength="{!oracleField.length}" label="{!oracleField.label}" value="{!oracleField.value}" required="{!oracleField.notNull}" style="width:148px" rendered="{!IF(oracleField.length = null, false, true)}"/>
+									
+									<!-- Input without Length -->
+									<apex:input type="text" label="{!oracleField.label}" value="{!oracleField.value}" required="{!oracleField.notNull}" style="width:148px" rendered="{!IF(oracleField.length = null, true,  false)}"/> 
+								</apex:outputPanel>
+								
+								<!-- Date Input -->
+								<apex:inputText label="{!oracleField.label}" id="dateInput" value="{!oracleField.value}" required="{!oracleField.notNull}" style="width:148px" onfocus="DatePicker.pickDate(false, this, false);" rendered="{!IF(oracleField.dataType = 'DATE', true, false)}" /> 
+							</apex:outputPanel> 
+						</apex:outputPanel>
+						
+					</apex:pageBlockSectionItem>
+				</apex:repeat>
+			</apex:pageBlockSection>
+			
+			
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

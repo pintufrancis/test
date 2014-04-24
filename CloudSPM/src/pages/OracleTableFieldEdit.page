@@ -1,0 +1,42 @@
+<!--*******************************************************************
+* File Name : OracleTableFieldEdit
+* Description : Page for edit OracleTableField
+* Copyright : CloudSPM
+******************************************************************** --> 
+<apex:page tabStyle="Oracle_Table_Field__c" standardController="Oracle_Table_Field__c" extensions="OracleTableFieldEditController"> 
+    <apex:sectionHeader title="Oracle Table Field" subtitle="{!Oracle_Table_Field__c.Name}" />
+    <br/> 
+    <apex:form id="form"> 
+        <apex:pageBlock mode="edit" title="Oracle Table Field Edit" tabStyle="Oracle_Table_Field__c"> 
+        	<apex:pageBlockButtons >
+        		<apex:commandButton action="{!save}" value="Save"/>
+        		<apex:commandButton action="{!cancel}" value="Cancel"/>
+        	</apex:pageBlockButtons>
+        	<apex:actionFunction name="loadColumnList" action="{!refreshColumnList}" reRender="form" />
+        	<apex:pageBlockSection title="Information">
+        		<apex:inputField value="{!Oracle_Table_Field__c.Name}" required="true"/>
+        		<apex:inputField value="{!Oracle_Table_Field__c.Display_Name__c}" />
+        		<apex:inputField value="{!Oracle_Table_Field__c.Datatype__c}" />
+        		<apex:inputField value="{!Oracle_Table_Field__c.Not_Null__c}" />
+        		<apex:inputField value="{!Oracle_Table_Field__c.Length__c}" />
+        		<apex:inputField value="{!Oracle_Table_Field__c.Lookup_Name__c}" onChange="loadColumnList()"/>
+        		<apex:pageBlockSectionItem >
+	        		<apex:outputLabel value="Lookup Input Column" for="lookupsInput"/>
+	        		<apex:selectList id="lookupsInput" value="{!Oracle_Table_Field__c.Lookup_Input_Column__c}" size="1">
+	        			<apex:selectOptions value="{!objectList}"/>
+	        		</apex:selectList>
+        		</apex:pageBlockSectionItem>
+        		<apex:pageBlockSectionItem >
+	        		<apex:outputLabel value="Lookup Output Column" for="lookupsOutput"/>
+	        		<apex:selectList id="lookupsOutput" value="{!Oracle_Table_Field__c.Lookup_Column__c}" size="1">
+	        			<apex:selectOptions value="{!objectList}"/>
+	        		</apex:selectList>
+        		</apex:pageBlockSectionItem>
+        		<apex:inputField value="{!Oracle_Table_Field__c.Manual_Entry__c}" />
+        		<apex:inputField value="{!Oracle_Table_Field__c.Display_Field__c}" />
+        		<apex:inputField value="{!Oracle_Table_Field__c.Display_Sequence__c}" />
+        	</apex:pageBlockSection>
+        </apex:pageBlock>
+
+    </apex:form>
+</apex:page>

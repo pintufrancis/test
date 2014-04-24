@@ -1,0 +1,45 @@
+<apex:page controller="FetchParameterValuesController">
+ <apex:form >
+  <apex:pageblock >
+     <apex:pageblockbuttons location="top">
+         <apex:commandButton value="Get value" action="{!callServices}"  rerender="pnl" status="status"/>
+         <apex:commandbutton value="Save" action="{!saveRecords}" rerender="pnl" status="status"/>
+     </apex:pageblockbuttons>
+     
+     <apex:actionStatus id="status" startText="Please Wait...."></apex:actionStatus>
+     <apex:outputpanel id="pnl">
+     <apex:pagemessages ></apex:pagemessages>
+     <apex:pageBlockSection title="Report Information" collapsible="false">
+         <apex:pageblocksectionitem >
+             <apex:outputlabel value="Report Path"></apex:outputlabel>
+             <apex:inputText value="{!reportName}"/>
+         </apex:pageblocksectionitem>
+     </apex:pageblocksection>
+     
+         <br/><br/>
+         <apex:pageBlockSection title="Parameter Records" collapsible="false"> </apex:pageBlockSection>
+         <apex:pageblocktable value="{!modelList}" var="model" rendered="{!IF(modelList.size>0,true,false)}">
+             <apex:column headerValue="Select">
+                 <apex:inputcheckbox value="{!model.check}"/>
+             </apex:column>
+             <apex:column headerValue="Parameter Name">
+                 <apex:inputtext value="{!model.rec.Parameter_Name__c}" style="width:200px;"/>
+             </apex:column>
+             <apex:column headerValue="Possible Values">
+                 <apex:inputtext value="{!model.rec.Possible_Values__c}" style="width:800px;"/>
+             </apex:column>
+         </apex:pageblocktable>
+         <apex:outputText rendered="{!IF(modelList.size>0,false,true)}" value="No records available"></apex:outputText>
+        <!--
+        {!response}
+       
+         <apex:pageBlockTable value="{!rowsxCompleteData}" var="rcd">
+             <apex:repeat value="{!rcd.columns}" var="col">
+                 <apex:column value="{!col}" />
+             </apex:repeat>
+         </apex:pageBlockTable>
+        --> 
+     </apex:outputpanel>
+    </apex:pageblock>
+  </apex:form>
+</apex:page>

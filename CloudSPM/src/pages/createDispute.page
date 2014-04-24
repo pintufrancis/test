@@ -1,0 +1,64 @@
+<apex:page controller="CreateDisputeController">
+  <!-- Begin Default Content REMOVE THIS -->
+  <apex:form >
+     <apex:pageBlock title="Create Dispute">
+      <apex:pageBlockButtons >
+        <apex:commandButton action="{!save}" value=" Save "> </apex:commandButton>
+        <apex:commandButton action="{!cancel}" value="Cancel"></apex:commandButton>
+       </apex:pageBlockButtons>
+       <apex:pageMessages />
+       <apex:pageBlockSection title="General Information" columns="1"  >
+       <apex:panelGrid columns="2"> 
+            <apex:outputLabel style="font-weight:bold" value="Participant Name" ></apex:outputLabel>
+            <apex:selectList id="participant" value="{!Dispute.participantName}" size="1">
+                <apex:selectOptions value="{!selectLists['MgrHierarchy']}"></apex:selectOptions>
+            </apex:selectList>
+                
+            <apex:outputLabel style="font-weight:bold" value="Type" ></apex:outputLabel>
+            <apex:selectList id="types" value="{!Dispute.type}" size="1" >
+                <apex:selectOptions value="{!selectLists['DisputeType']}"></apex:selectOptions>
+            </apex:selectList>
+            <apex:outputLabel style="font-weight:bold" value="Summary" ></apex:outputLabel>
+            <apex:inputText value="{!Dispute.summary}"  size="80"  ></apex:inputText>
+            <apex:outputLabel style="font-weight:bold" value="Justification" ></apex:outputLabel>
+            <apex:inputTextarea rows="6" cols="140" value="{!Dispute.justification}"></apex:inputTextarea> 
+            <apex:outputLabel style="font-weight:bold"  value="Description" ></apex:outputLabel>           
+            <apex:inputTextarea value="{!Dispute.description}" rows="6" cols="140" ></apex:inputTextarea>
+            </apex:panelGrid>
+       </apex:pageBlockSection>
+       <apex:pageBlockSection title="Dispute Details" columns="1"  >
+           <apex:panelGrid columns="4" width="100%"  >
+                <apex:outputLabel style="font-weight:bold" value="Transaction Type" ></apex:outputLabel>
+            <apex:selectList id="types" value="{!Dispute.ttype}" size="1" >
+                <apex:selectOptions value="{!selectLists['Trx Type']}"></apex:selectOptions>
+            </apex:selectList>
+           
+           
+            <apex:outputLabel style="font-weight:bold" value="Actual Credit Amount" ></apex:outputLabel>
+            <apex:inputText value="{!Dispute.actualCrAmount}"></apex:inputText> 
+            
+            <apex:outputLabel style="font-weight:bold" value="Transaction Number" ></apex:outputLabel>
+            <apex:inputText value="{!Dispute.transactionNumber}"></apex:inputText> 
+            
+            <apex:outputLabel style="font-weight:bold" value="Expected Amount" ></apex:outputLabel>
+            <apex:inputText value="{!Dispute.expectedAmount}"></apex:inputText> 
+            
+             <apex:outputLabel style="font-weight:bold" value="Event Date" ></apex:outputLabel>
+            <apex:inputText id="date" value="{!Dispute.eventDate}" onfocus="DatePicker.pickDate(false, this, false);" ></apex:inputText> 
+                       
+              <apex:outputLabel style="font-weight:bold" value="Currency" ></apex:outputLabel>
+            <apex:inputText value="{!Dispute.currencyType}"></apex:inputText>           
+            </apex:panelGrid>
+       </apex:pageBlockSection>
+       <!--  
+       <apex:pageBlockSection title="Stock data from External Web service" columns="3">
+           <apex:panelGrid columns="2">
+           <apex:inputText value="{!Dispute.quoteStr}"></apex:inputText><apex:outputLabel value="(Ex - GOOG,AAPL )"></apex:outputLabel>
+           </apex:panelGrid> 
+           <apex:commandButton action="{!quote}" value="Get Stock Quote"/>
+           <apex:outputLabel ></apex:outputLabel>
+           <apex:inputTextarea value="{!Dispute.stockValue}" rows="5" cols="80"></apex:inputTextarea> 
+       </apex:pageBlockSection> -->
+     </apex:pageBlock>
+  </apex:form>
+</apex:page>

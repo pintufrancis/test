@@ -1,0 +1,770 @@
+<apex:page docType="html-5.0" applyBodyTag="false" applyHtmlTag="false" cache="true" controller="compensationReportController" showHeader="false" standardStylesheets="true">
+
+<html>
+
+<head>
+	<title>My Compensation Reports</title>
+	
+	<!-- jQuery Mobile -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+	<apex:stylesheet value="https://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+	<apex:includeScript value="https://code.jquery.com/jquery-1.9.1.min.js" />
+	<apex:includeScript value="https://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js" />
+
+	<!-- Salesforce1 -->
+	<apex:includeScript value="/canvas/sdk/js/publisher.js" />
+	<apex:includeScript value="https://code.highcharts.com/highcharts.js" />
+	<apex:includeScript value="https://code.highcharts.com/highcharts-more.js" />
+	<apex:includeScript value="{!URLFOR($Resource.high_charts,'js/themes/grid.js')}" />
+
+	<apex:includeScript value="https://code.highcharts.com/modules/exporting.js" />
+	<apex:includeScript value="{!URLFOR($Resource.multiple_select,'jquery.multiple.select.js')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.multiple_select,'multiple-select.css')}" />
+	
+	<style>
+		.apexp .bPageBlock.apexDefaultPageBlock .pbBody {
+			margin: 0px 0px 0px 0px;
+		}
+		
+		ui-loading .ui-page {
+			overflow: hidden;
+		}
+		/* Show priority 1 at 320px (20em x 16px) */
+		@media screen and (min-width: 20em) {
+			th.ui-table-priority-1,td.ui-table-priority-1 {
+				display: table-cell;
+			}
+		}
+		
+		.ui-table-columntoggle-btn {
+			float: left !important;
+		}
+	</style>
+	<script>
+	    $(document).on('pageshow', '#index', function () {
+	        var chart;
+	    });
+	    
+        $(document).on('click', '#goforward', function () {
+            if ($.mobile.activePage.next('[data-role=page]').length !== 0) {
+                var next = $.mobile.activePage.next('[data-role=page]');
+                $.mobile.changePage(next, {
+                    transition: 'slide'
+                });
+            } else {
+                alert('There\'s no next page');
+            }
+        });
+        
+        $(document).on('click', '#goback', function () {
+            if ($.mobile.activePage.prev('[data-role=page]').length !== 0) {
+                var prev = $.mobile.activePage.prev('[data-role=page]');
+                $.mobile.changePage(prev, {
+                    transition: 'slide',
+                    reverse: true
+                });
+            } else {
+                alert('There\'s no previous page');
+            }
+        });
+            
+        $( document ).on( "pageinit", "#index", function( event ) {
+            if ('{!$CurrentPage.parameters.runReport}' == 'true') {
+	            var next = $("#page1");
+	            $.mobile.changePage(next, {
+	                transition: 'slide'
+	            });
+       		};
+		});
+		
+        $(document).on('pagebeforeshow', '#index', function(){ 
+            fillInitialValues();
+        });
+            
+        var getCSS = function (prop, fromClass) {
+            var $inspector = $("<div>").css('display', 'none').addClass(fromClass);
+            $("body").append($inspector); // add to DOM, in order to read the CSS property
+            try {
+                return $inspector.css(prop);
+            } finally {
+                $inspector.remove(); // and remove from DOM
+            }
+        };
+
+        var allListValues = new Array();
+        var dashboardJSON = new Array();
+        var isExecuted = false;
+        $(document).ready(function () {
+             
+            buildLeftNav();
+            
+            setinactivelink();
+            //setTreeView();
+            setTimeout(function () {
+                setChartView();
+            }, 2000);
+            
+            if ('{!$CurrentPage.parameters.runReport}' == 'true') {
+                showSideBar();
+            }
+
+            $('.multiselect').multipleSelect({
+                onClose: function () {}
+            });
+
+            $("#cssmenu").find('a').hover(function () {
+                    var colorVal = getCSS('background-color', 'tertiaryPalette');
+                    $(this).css('background', colorVal);
+                },
+                function () {
+                    if (!$(this).hasClass("activeMenu")) {
+                        $(this).css('background', 'white');
+                    }
+                }
+            );
+            
+            $(".activeMenu").each(function () {
+                var colorVal = getCSS('background-color', 'tertiaryPalette');
+                $(this).css('background', colorVal);
+            });
+
+        });
+
+        function renderHighChart(highChartObj, containerId) {
+            $('#' + containerId).width($('#index').outerWidth()-50);
+            if (highChartObj.chartType == "Spedometer") {
+                renderGuage(highChartObj, containerId)
+            } else if (highChartObj.chartType == "Pie") {
+                renderPieChart(highChartObj, containerId)
+            } else {
+                renderBarChart(highChartObj, containerId)
+            }
+        }
+
+        function renderBarChart(highChartObj, containerId) {
+            $('#' + containerId).highcharts({
+                chart: {
+                    type: 'column'
+                },
+                credits: {
+                    enabled: false
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: highChartObj.xAxisLAble
+                },
+                xAxis: {
+                    categories: highChartObj.categories,
+                    labels: {
+                        align: 'center',
+
+                        style: {
+                            fontSize: '11px',
+                            fontFamily: 'Verdana, sans-serif'
+                        }
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: highChartObj.yAxisLAble
+                    }
+                },
+                scrollbar: {
+                    enabled: true
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                        '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0,
+                        borderWidth: 0
+                    }
+                },
+                series: highChartObj.series
+            });
+        }
+
+        function renderPieChart(highChartObj, containerId) {
+            var pieData = new Array();
+            var seriesdata = highChartObj.series[0].data;
+            $.each(highChartObj.categories, function (index, value) {
+                var innerArr = new Array();
+                innerArr.push(value);
+                innerArr.push(seriesdata[index]);
+                pieData.push(innerArr)
+            });
+            
+            $('#' + containerId).highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    text: ' '
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.y}</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        size: '100%',
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            connectorColor: '#000000',
+                            format: '<b>{point.name}</b>: {point.y}',
+                            distance: -30,
+                            color: '#000000'
+                        },
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: '',
+                    data: pieData
+                }]
+            });
+        }
+
+        function renderGuage(highChartObj, containerId) {
+            $.each(highChartObj.series, function (index, value) {
+                value['dataLabels'] = {
+                    useHTML: true,
+                    formatter: function () {
+                        return '<div style="color:black;width:220px;text-align:center;font-weight:bold;;">' + this.y + ' </div>';
+                    },
+                    backgroundColor: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 0,
+                            y2: 1
+                        },
+                        stops: [
+                            [0, '#DDD'],
+                            [1, '#FFF']
+                        ]
+                    },
+                    offset: 10
+                };
+            });
+
+            $('#' + containerId).highcharts({
+                chart: {
+                    type: 'gauge',
+                    plotBackgroundColor: null,
+                    plotBackgroundImage: null,
+                    plotBorderWidth: 0,
+                    plotShadow: false
+                },
+
+                title: {
+                    text: ''
+                },
+                credits: {
+                    enabled: false
+                },
+                pane: {
+                    startAngle: -100,
+                    endAngle: 100,
+                    background: null
+                },
+                plotOptions: {
+                    gauge: {
+                        dial: {
+                            radius: '70%',
+                            backgroundColor: 'black',
+                            borderColor: 'black',
+                            borderWidth: 1,
+                            baseWidth: 10,
+                            topWidth: 1,
+                            baseLength: '90%', // of radius
+                        },
+                        pivot: {
+                            radius: 15,
+                            borderWidth: 1,
+                            borderColor: 'black',
+                            backgroundColor: {
+                                linearGradient: {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 1,
+                                    y2: 1
+                                },
+                                stops: [
+                                    [0, 'white'],
+                                    [1, 'white']
+                                ]
+                            }
+                        }
+                    }
+                },
+                // the value axis
+                yAxis: {
+                    min: 0,
+                    max: 100,
+
+                    minorTickInterval: 'auto',
+                    minorTickWidth: 0,
+                    minorTickLength: 10,
+                    minorTickPosition: 'inside',
+                    minorTickColor: '#fff',
+
+                    tickPixelInterval: 30,
+                    tickWidth: 2,
+                    tickPosition: 'inside',
+                    tickLength: 15,
+                    tickColor: '#fff',
+                    labels: {
+                        step: 2,
+                        rotation: 'auto'
+                    },
+                    plotBands: highChartObj.plotBands
+                },
+                series: highChartObj.series
+            });
+        }
+
+        function setChartView() {
+            var i = 2;
+            var j = 1;
+            while (true) {
+                i = j + 1;
+                var flag = false;
+                if ($('#chartData' + j).find('.vf-reset').size() > 0 && $('#chartData' + j).find('.vf-reset').size() < 2) {
+                    break;
+                }
+                $('#chartData' + j).find('.vf-reset:gt(0)').each(function () {
+                    flag = true;
+                    while (true) {
+                        if ($('#chartData' + i).hasClass('chart')) {
+                            $(this).appendTo('#chartData' + i)
+                            i += 1;
+                            break;
+                        }
+                        i += 1;
+                    }
+                });
+                if (flag == true) {
+                    j += 1;
+                    break;
+                }
+                j += 1;
+                if ($('#chartData' + j).size() == 0) {
+                    break;
+                }
+
+            }
+        }
+
+        function buildLeftNav() {
+            $('#cssmenu > ul > li:has(ul)').addClass("has-sub");
+            $('#cssmenu > ul ').slideDown('normal');
+            $('#cssmenu > ul > li > a').each(function () {
+                var checkElement = $(this).next();
+                if ((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
+                    $('#cssmenu ul ul:visible').slideUp('normal');
+                    checkElement.slideDown('normal');
+                }
+            });
+
+            $('#cssmenu > ul > li > a').click(function () {
+
+                var checkElement = $(this).next();
+
+                $('#cssmenu li').removeClass('active');
+                $(this).closest('li').addClass('active');
+
+                if ((checkElement.is('ul')) && (checkElement.is(':visible'))) {
+                    $(this).closest('li').removeClass('active');
+                    checkElement.slideUp('normal');
+                }
+
+                if ((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
+                    $('#cssmenu ul ul:visible').slideUp('normal');
+                    checkElement.slideDown('normal');
+                }
+
+                if (checkElement.is('ul')) {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+        }
+
+        function setTreeView() {
+            $("#browser").treeview();
+            var linkid = '{!linkId}';
+            if (linkid != '') {
+                if ($("#" + linkid).parent().parent().parent().parent().hasClass("closed") && $("#" + linkid).parent().parent().parent().parent().hasClass("expandable") ) {
+
+                    $("#" + linkid).parent().parent().parent().parent().removeClass("closed");
+                    $("#" + linkid).parent().parent().parent().parent().removeClass("expandable");
+
+                    $("#" + linkid).parent().parent().parent().parent().addClass("collapsable");
+                    $("#" + linkid).parent().parent().parent().css("display", "block");
+
+                }
+            }
+        }
+
+        function setinactivelink() {
+            var linkid = '{!linkId}';
+            if (linkid != '') {
+                $("#" + linkid).addClass("activeMenu");
+            }
+
+        }
+
+        function setPageDisplayFormat() {
+            setinactivelink();
+            buildLeftNav();
+            showSideBar();
+            fillInitialValues();
+
+            $("#cssmenu").find('a').hover(function () {
+                    console.log($(this));
+                    var colorVal = getCSS('background-color', 'tertiaryPalette');
+                    console.log(colorVal);
+                    $(this).css('background', colorVal);
+                },
+                function () {
+                    if (!$(this).hasClass("activeMenu")) {
+                        $(this).css('background', 'white');
+                    }
+                }
+            );
+
+            $(".activeMenu").each(function () {
+                var colorVal = getCSS('background-color', 'tertiaryPalette');
+                $(this).css('background', colorVal);
+            });
+        }
+
+        function showSideBar() {
+            if ($("#sidebarDiv").is(":visible") == true) {
+                $("#handlebarContainer").css("left", "0px");
+                $("#sidebarDiv").fadeOut(500);
+                $('#sideBarTd').css("width", "0px");
+            } else {
+                $("#handlebarContainer").css("left", "214px");
+                $("#sidebarDiv").fadeIn(500);
+                $('#sideBarTd').css("width", "220px");
+            }
+        }
+
+        function hideReport(index) {
+            if ($('#tab' + index).is(":visible") == true) {
+                $('#tab' + index).toggle();
+                $('#collapsible' + index).hide();
+                $('#explandable' + index).show();
+            } else {
+                $('#tab' + index).toggle();
+                $('#collapsible' + index).show();
+                $('#explandable' + index).hide();
+            }
+        }
+
+        function fillAllListValues() {
+            $('.Period_Name').find('option').each(function () {
+                allListValues.push($(this).val());
+            });
+        }
+
+        function showOtherOptions(value, label) {
+            if ($(value).val() == 'other') {
+                $(value).next().css("display", 'block');
+                $(value).next().val('');
+            } else {
+            
+            }
+            if (label == 'Period Year' || label == '*Period Year') {
+                $('.Period_Name').val('');
+                if ($(value).val() != '' && $(value).val() != 'other') {
+                    var year = $(value).val();
+                    var matchingCars = year.substr(year.length - 2);
+
+                    $('.Period_Name').find('option').each(function () {
+                        if ($(this).val() == '') {
+                            $(this).filter("span > option").unwrap();
+                            return;
+                        }
+                        var optionLastChaars = $(this).val().substr($(this).val().length - 2);
+                        if (optionLastChaars == matchingCars) {
+                            $(this).filter("span > option").unwrap();
+                        } else {
+                            $(this).filter(":not(span > option)").wrap("<span>").parent().hide();
+                        }
+                    });
+                } else { 
+
+                    $('.Period_Name').find('option').each(function () {
+                        $(this).filter("span > option").unwrap();
+                    });
+
+                }
+                
+                $('.Period_Name').children('option').eq(1).attr('selected', 'selected').siblings('option').removeAttr('selected');
+                $('select').selectmenu('refresh', true);
+            }
+            
+            $('.multiselect').multipleSelect({
+                onClose: function () {
+                    alert(this.getSelects());
+                }
+            });
+        }
+
+        function showOtherOptionsMultiSelect(values, label) {
+            var matchingYears = new Array();
+            $.each(values, function (index, value) {
+                matchingYears.push(value.substr(value.length - 2));
+            });
+            if (label == 'Period Year' || label == '*Period Year') {
+
+                $('.Period_Name').val('');
+                if (values.length > 0) {
+                    $('.Period_Name').find('option').each(function () {
+                        if ($(this).val() == '') {
+                            $(this).filter("span > option").unwrap();
+                            return;
+                        }
+                        var optionLastChaars = $(this).val().substr($(this).val().length - 2);
+                        if ($.inArray(optionLastChaars, matchingYears) != -1) {
+                            $(this).filter("span > option").unwrap();
+                        } else {
+                            $(this).filter(":not(span > option)").wrap("<span>").parent().hide();
+                        }
+                    });
+                } else {
+
+                    $('.Period_Name').find('option').each(function () {
+                        $(this).filter("span > option").unwrap();
+                    });
+
+                }
+            }
+
+            $('.Period_Name').multipleSelect({
+                onClose: function () {
+                    var str = '';
+                    str = this.objectref.getSelects().join(",");
+                    this.objectref.$el.parent().find("input[id*='paramText']").val(str);
+                }
+            });
+        }
+        
+        function fillInitialValues() {
+            var month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var d = new Date();
+            var currentMonth = month_names[d.getMonth()];
+
+            if ($(".Period_Year").length > 0) {
+                var year = $(".Period_Year option:selected").val();
+                var matchingCars = year.substr(year.length - 2);
+                var periodName = currentMonth + '-' + d.getFullYear();
+
+                $('.Period_Name').find('option').each(function () {
+                    if ($(this).val() == '') {
+                        $(this).filter("span > option").unwrap();
+                        return;
+                    }
+
+                    var optionLastChaars = $(this).val().substr($(this).val().length - 2);
+                    if (optionLastChaars == matchingCars) {
+                        $(this).filter("span > option").unwrap();
+                        if ($(this).val() == periodName && '{!$CurrentPage.parameters.runReport}' != 'true') {
+                        	$(this).attr('selected', 'selected');
+                    	}
+                    } else {
+                        $(this).filter(":not(span > option)").removeAttr('selected').wrap("<span>").parent().hide();
+                    }
+                    
+                });
+                $('select').selectmenu();
+				$('select').selectmenu('refresh', true);
+            }
+        
+               $('.multiselect').each(function () {
+                var mSelect = $(this).multipleSelect({
+                    onClose: function () {
+                        var str = '';
+                        str = this.objectref.getSelects().join(",");
+                        this.objectref.$el.parent().find("input[id*='paramText']").val(str);
+                        if (this.objectref.$el.hasClass('Period_Year')) {
+                            showOtherOptionsMultiSelect(this.objectref.getSelects(), 'Period Year')
+                        }
+
+                    }
+                });
+
+                var str = $(this).parent().find("input[id*='paramText']").val();
+                $(this).multipleSelect('setSelects', str.split(","));
+                if ($(this).hasClass('Period_Year')) {
+                    showOtherOptionsMultiSelect($(this).multipleSelect('getSelects'), 'Period Year')
+                }
+            });
+            }
+        </script>
+</head>
+
+<body>
+	<apex:form >
+		<div data-role="page" id="index">
+			<div style="background: #037585; height: 40px; text-align: center; vertical-align: middle; width: 100%; display: table;">
+				<div style="display: table-cell; vertical-align: middle;">
+					<h3 style="color: #fff;">Dashboard Parameters</h3>
+				</div>
+			</div>
+			<div data-role="content">
+				<div style="margin-left: 20px;">
+					<center>
+						<apex:actionStatus id="status3">
+							<apex:facet name="start">
+								<div>
+									<img src="/img/loading24.gif" style="vertical-align: middle;" />
+									<span style="margin-left: 10px; font-size: 12px; font-weight: bold; color: #000000;">
+										Please wait while we get the records...
+									</span>
+								</div>
+							</apex:facet>
+						</apex:actionStatus>
+					</center>
+				</div>
+				<apex:actionFunction name="runReport" action="{!runReport}" status="status3" reRender="parameters,chart,dashboard,topLinks,exportFun" />
+
+				<apex:outputPanel id="controls" rendered="{!paramModel.size >0}">		
+					<table style="width: 100%;">
+						<apex:variable value="{!1}" var="count" />
+						<apex:repeat value="{!paramModel}" var="pm">
+							<tr>
+								<td valign="top" Class="param" width="33%">
+									<div>
+										<apex:outputLabel value="{!pm.dashboardParam.Label__c}"></apex:outputLabel>
+										<apex:selectList styleClass="{!IF(pm.dashboardParam.Label__c=='Period Name','Period_Name',(IF(pm.dashboardParam.Label__c=='Period Year' || pm.dashboardParam.Label__c=='*Period Year','Period_Year','')))}"
+											onChange="showOtherOptions(this,'{!pm.dashboardParam.Label__c}'); return false;"
+											size="1" value="{!pm.dashboardParam.Default_Value__c}">
+											<apex:selectOptions value="{!pm.paramList}"></apex:selectOptions>
+										</apex:selectList>
+									</div>
+								</td>
+							</tr>
+							<apex:variable var="count" value="{!count + 1}" />
+						</apex:repeat>
+					</table>
+				</apex:outputPanel>
+				
+				<apex:outputPanel >
+					<apex:commandButton style="margin-left:12px;" value="Run Report" onClick="runReport(); return false;" />
+				</apex:outputPanel>
+			</div>
+		</div>
+
+		<apex:variable var="index" value="{!1}" />
+		<apex:variable var="columnIndex" value="{!1}" />
+
+		<apex:repeat value="{!ccList}" var="rmd">
+			<div data-role="page" id="page{!index}">
+				<div data-theme="a" data-role="header" style="height: 40px;">
+					<a id="goback" href="#" data-icon="carat-l" data-iconpos="notext" data-corners="true" data-shadow="true" data-iconshadow="true"></a>
+					<a id="goforward" href="#" data-icon="carat-r" data-iconpos="notext" data-corners="true" data-shadow="true" data-iconshadow="true" ></a>
+				</div>
+				<div style="background: #037585;height: 40px;text-align: center;vertical-align: middle;width: 100%;display: table; " > 
+		            <div style="display: table-cell;vertical-align: middle;">
+		             	<h3 style="color: #fff;">{!rmd.displayName}</h3>
+		             </div>
+                </div>
+				<div data-role="content">
+					<div id="coldiv{!columnIndex}" style="width: 100%; overflow: auto;">
+						<apex:outputPanel id="dashboard" rendered="{!IF(rmd.chartData.rowList==null,true,false)}">
+							<div style="height: auto;">
+								<div style="height: auto;">
+									<table style="width: 100%;" border="1" id="table{!index}" data-role="table" data-mode="columntoggle" cellspacing="0" cellpadding="0">
+										<thead>
+											<tr>
+												<apex:repeat value="{!rmd.headerValues}" var="cl">
+													<th data-priority="{!IF(cl.mobileDisplay, '1', '6')}" colspan="1" scope="col" style="width:{!cl.width};text-align:{!cl.textAlignment};font-size: 75%;">
+                                                    	<apex:outputText escape="false" value="{!cl.headerValue}"></apex:outputText>
+                                                   	</th>
+												</apex:repeat>
+											</tr>
+										</thead> 
+										<tbody>
+											<apex:repeat value="{!rmd.rowList}" var="row">
+												<tr onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}" onmouseout="if (window.hiOff){hiOff(this);} " onmouseover="if (window.hiOn){hiOn(this);} ">
+													<apex:repeat value="{!row.columnsList}" var="cl">
+														<td valign="top" align="{!cl.textAlignment}" colspan="1" style="font-size: 75%;">
+															<apex:outputText escape="false" value="{!cl.columnValue}"></apex:outputText>
+														</td>
+													</apex:repeat>
+												</tr>
+											</apex:repeat>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</apex:outputPanel>
+
+						<apex:outputPanel >
+							<apex:outputPanel style="float:right;" id="topLinks" rendered="{!IF(rmd.chartData.rowList==null,true,false)}">
+								<br />
+								<apex:commandLink onClick="previous('{!rmd.index}'); return false;" style="color:#EF2B2D;" value="< Previous" rendered="{!!rmd.flag1}" />
+								<apex:outputText style="color:#c5c5c5;" rendered="{!rmd.flag1}" value="< Previous" />
+								&nbsp;&nbsp;
+                                <apex:commandLink onClick="next('{!rmd.index}'); return false;" style="color:#EF2B2D;" rendered="{!!rmd.flag2}" value="Next >" />
+								<apex:outputText style="color:#c5c5c5;" rendered="{!rmd.flag2}" value="Next >" />
+							</apex:outputPanel>
+						</apex:outputPanel>
+
+						<apex:outputPanel rendered="{!IF(rmd.chartData.rowList!=null,true,false)}">
+
+						</apex:outputPanel>
+
+						<div id="highchart{!index}" style="width: 100%; height: 350px;">
+
+						</div>
+						
+						<Script>
+	                        var highChartObj{!index} = {!rmd.chartData.dataJsonStr};
+	                        if (isExecuted == false) {
+	                            if (!$.isEmptyObject(highChartObj{!index})) {
+	                                renderHighChart(highChartObj{!index}, 'highchart{!index}');
+	                            }
+	                            var widget{!columnIndex} = {
+	                                widgetTitle: '{!rmd.displayName}',
+	                                widgetId: "widget_coldiv{!columnIndex}",
+	                                widgetContent: $("#coldiv{!columnIndex}"),
+	                                width: '{!rmd.width}%'
+	                            };
+	                            dashboardJSON.push(widget{!columnIndex});
+	                        }
+                    	</Script>
+						<apex:variable var="index" value="{!index+1}" />
+						<apex:variable var="columnIndex" value="{!columnIndex+1}" />
+					</div>
+				</div>
+			</div>
+		</apex:repeat>
+	</apex:form>
+</body>
+<script>
+	if ('{!$CurrentPage.parameters.runReport}' == 'true') {
+    	$.mobile.loadPage( "#page1");
+	}
+</script>
+</html>
+</apex:page>

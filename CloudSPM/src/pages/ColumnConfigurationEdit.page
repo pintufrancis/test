@@ -1,0 +1,32 @@
+<apex:page controller="ColumnConfigurationEditController" tabStyle="ColumnConfiguration__c">
+<apex:form >
+<apex:sectionHeader title="ColumnConfigurations" subtitle="Edit Column Configuration"/>
+<apex:pageMessages ></apex:pageMessages>
+<apex:pageBlock title="ColumnConfigurations">
+<apex:pageBlockButtons >
+  <apex:commandButton value="Save" action="{!save}"/>
+</apex:pageBlockButtons>
+  <apex:pageBlockTable value="{!ColumnConfigurationList}" var="p">
+    <apex:column headerValue="Name"><apex:inputField value="{!p.Name}"/></apex:column>
+    <apex:column headerValue="Column Format"><apex:inputField value="{!p.Column_Format__c}"/></apex:column>
+    <apex:column headerValue="Pecision"><apex:inputField value="{!p.Pecision__c}"/></apex:column>
+    <apex:column headerValue="Column Name"><apex:inputField value="{!p.Column_Name__c}"/></apex:column>
+    
+    <apex:column >
+        <apex:facet name="header">
+        Column Sequence<br/>
+        <i>(start from 0)</i><br/>
+        </apex:facet>
+    <apex:inputField value="{!p.Column_Sequence__c}" style="width:40px;"/></apex:column>
+    
+    <apex:column headerValue="Column Width"><apex:inputField value="{!p.Column_Width__c}"/></apex:column>
+    <apex:column headerValue="Display Sequence"><apex:inputField value="{!p.Display_Sequence__c}" style="width:40px;"/></apex:column>
+    <apex:column headerValue="Display"><apex:inputField value="{!p.Display__c}"/></apex:column>
+    <apex:column headerValue="Mobile Display"><apex:inputField value="{!p.Mobile_Display__c}"/></apex:column>
+    <apex:column headerValue="FIC Reports Configuration"><apex:inputField value="{!p.FIC_Reports_Configuration__c}"/></apex:column>
+    <apex:column headerValue="Pivot Sequence"><apex:inputField value="{!p.Pivot_Sequence__c}"/></apex:column>
+    <apex:column headerValue="Pivot Result"><apex:inputField value="{!p.Pivot_Result__c}"/></apex:column>
+  </apex:pageBlockTable>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

@@ -1,0 +1,10 @@
+<!--
+    Name : DownloadTransactionsCSV
+    Author : CloudSPM
+    Date : November 28, 2013
+    Description : This Page is download CSV file of transaction records from oracle fusion service.
+    Transactions
+-->
+<apex:page controller="TransactionController" contentType="text/csv#{!$currentpage.parameters.displayName}.csv"   action="{!executeReport}" standardStylesheets="false"  sidebar="false" showHeader="false" ><apex:variable value="{!0}" var="counter"/><apex:repeat value="{!headerValues}" var="cl" >{!cl.headerValue}<apex:outputText value="," rendered="{!IF(counter+1 < headerValues.size,true,false)}"></apex:outputText><apex:variable value="{!counter+1}" var="counter"/></apex:repeat>
+{!csvstring}
+</apex:page>

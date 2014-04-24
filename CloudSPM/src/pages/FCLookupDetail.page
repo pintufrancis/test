@@ -1,0 +1,70 @@
+<!--
+                Name        :        FCLookupDetail
+                Author      :        CloudSPM
+                Date        :        8 jan 2014
+                Description :        This  Page Shows FC Lookup Details of the FC Lookup Managers .
+
+-->
+<apex:page standardController="FC_Lookup_Manager__c" extensions="FCLookupDetailController" showHeader="false" sidebar="false" >
+<style>
+    .bPageBlock .pbBody {
+        padding: 0px 0px 4px;
+    }
+</style>
+<script>
+    function confirmDelete(index){
+        if(confirm("Are you sure?"))
+        {      
+            delRecord(index);
+        }
+        else
+        {
+            e.preventDefault();
+        }
+    }
+    function editFCDetail(index){
+        if('{!id}' != null){
+            window.top.location = '/apex/FCDetailEdit?id={!id}&row='+index;        
+        }
+        
+    }
+    function reloarDoc(){       
+        if('{!id}' != null){
+            window.top.location = '/{!id}';        
+        }
+    }
+</script>
+   <apex:form id="frm">
+   <apex:pageBlock >
+        <apex:pageBlockSection columns="1" >  
+            <apex:pageMessages ></apex:pageMessages>          
+            <apex:actionFunction name="delRecord" action="{!deleteRecords}" reRender="frm" onComplete="reloarDoc(); return false;" >
+                <apex:param name="arg" value="" assignTo="{!rowIndex}" />
+            </apex:actionFunction>
+            <apex:outputPanel rendered="{!rowList != null && rowList.size > 0}" >
+                <table class="list" cellspacing="0" cellpadding="0" border="0">                
+                    <tr class="headerRow">                
+                        <th class="actionColumn" scope="col">Action</th>
+                        <apex:repeat value="{!headerValues}" var="hv" >
+                            <th class=" zen-deemphasize" scope="col">{!hv}</th>
+                        </apex:repeat>
+                    </tr>
+                    <apex:repeat value="{!rowList}" var="row" >
+                        <tr class="dataRow even first" onmouseover="if (window.hiOn){hiOn(this);}" onmouseout="if (window.hiOff){hiOff(this);}" onfocus="if (window.hiOn){hiOn(this);}" onblur="if (window.hiOff){hiOff(this);}">
+                            <td class="actionColumn">
+                                <a id="a{!row.index}" class="actionLink" href="#" onClick="editFCDetail('{!row.index}');"  >Edit</a>
+                                 | 
+                                <a id="b{!row.index}" class="actionLink" onclick="confirmDelete('{!row.index}'); return false;" href="#" >Del</a>
+                            </td>
+                            <apex:repeat value="{!row.columns}" var="col" >
+                                <td>{!col}</td>
+                            </apex:repeat>
+                        </tr>
+                    </apex:repeat>
+                </table>
+            </apex:outputPanel>
+            <apex:pageMessage severity="info" strength="3" escape="false" rendered="{!rowList == null || rowList.size == 0}" title="<strong>No Record(s) Found</strong>"></apex:pageMessage>  
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>
